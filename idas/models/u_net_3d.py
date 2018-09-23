@@ -1,12 +1,11 @@
-import tensorflow as tf
+"""
+Implementation of an U-Net to deal with 3D inputs (5D tensors in). The implementation is just an extension to the 3D
+case of the original 2D U-Net from the 2015 paper by Ronneberger et al., at:
+  https://arxiv.org/pdf/1505.04597.pdf
+"""
 
-# define some wrappers:
-conv3d = tf.layers.conv3d
-max_pooling3d = tf.layers.max_pooling3d
-dense = tf.layers.dense
-dropout = tf.layers.dropout
-batch_normalization = tf.layers.batch_normalization
-conv3d_transpose = tf.layers.conv3d_transpose
+import tensorflow as tf
+from tensorflow.layers import conv3d, max_pooling3d, batch_normalization, conv3d_transpose
 
 
 def _encode_brick(incoming, nb_filters, is_training, scope):
@@ -70,31 +69,39 @@ def _ouput_layer(incoming, nb_classes, scope):
     return output
 
 
-def u_net_3d(self):
+class UNet3d:
 
-    with tf.variable_scope('U-Net_3D'):
-        # Encoder
-        en_brick_0, concat_0 = _encode_brick(self.input_data, 64, is_training=self.is_training, scope='encode_brick_1')
-        en_brick_1, concat_1 = _encode_brick(en_brick_0, 128, is_training=self.is_training, scope='encode_brick_2')
-        en_brick_2, concat_2 = _encode_brick(en_brick_1, 256, is_training=self.is_training, scope='encode_brick_3')
-        en_brick_3, concat_3 = _encode_brick(en_brick_2, 512, is_training=self.is_training, scope='encode_brick_4')
+    def __init__(self, input_data):
+        super().__init__()
+        self.input_data = input_data
+        self.prediction = None
+        self.is_training = True
 
-        # Core
-        core = _core_brick(en_brick_3, 1024, is_training=self.is_training, scope='core')
+    def u_net_3d(self):
 
-        # Decoder
-        dec_brick_1 = _decode_brick(core, concat_layer_in=concat_3, nb_filters=512, is_training=self.is_training,
-                                    scope='decode_brick_1')
-        dec_brick_2 = _decode_brick(dec_brick_1, concat_layer_in=concat_2, nb_filters=256, is_training=self.is_training,
-                                    scope='decode_brick_2')
-        dec_brick_3 = _decode_brick(dec_brick_2, concat_layer_in=concat_1, nb_filters=128, is_training=self.is_training,
-                                    scope='decode_brick_3')
-        dec_brick_4 = _decode_brick(dec_brick_3, concat_layer_in=concat_0, nb_filters=64, is_training=self.is_training,
-                                    scope='decode_brick_4')
+        with tf.variable_scope('U-Net_3D'):
+            # Encoder
+            en_brick_0, concat_0 = _encode_brick(self.input_data, 64, is_training=self.is_training, scope='encode_brick_1')
+            en_brick_1, concat_1 = _encode_brick(en_brick_0, 128, is_training=self.is_training, scope='encode_brick_2')
+            en_brick_2, concat_2 = _encode_brick(en_brick_1, 256, is_training=self.is_training, scope='encode_brick_3')
+            en_brick_3, concat_3 = _encode_brick(en_brick_2, 512, is_training=self.is_training, scope='encode_brick_4')
 
-        # Output
-        output = _ouput_layer(dec_brick_4, nb_classes=2, scope='ouput_layer')
+            # Core
+            core = _core_brick(en_brick_3, 1024, is_training=self.is_training, scope='core')
 
-        # self.logits = output
-        return output
+            # Decoder
+            dec_brick_1 = _decode_brick(core, concat_layer_in=concat_3, nb_filters=512, is_training=self.is_training,
+                                        scope='decode_brick_1')
+            dec_brick_2 = _decode_brick(dec_brick_1, concat_layer_in=concat_2, nb_filters=256, is_training=self.is_training,
+                                        scope='decode_brick_2')
+            dec_brick_3 = _decode_brick(dec_brick_2, concat_layer_in=concat_1, nb_filters=128, is_training=self.is_training,
+                                        scope='decode_brick_3')
+            dec_brick_4 = _decode_brick(dec_brick_3, concat_layer_in=concat_0, nb_filters=64, is_training=self.is_training,
+                                        scope='decode_brick_4')
+
+            # Output
+            output = _ouput_layer(dec_brick_4, nb_classes=2, scope='ouput_layer')
+
+            # self.prediction = output
+            return output
 

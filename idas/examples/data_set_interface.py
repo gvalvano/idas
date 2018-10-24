@@ -1,5 +1,5 @@
 """
-TODO: questo file è da modificare in funzione dell'applicazione
+TODO: this file is intended to be modified depending on the application
 """
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -103,37 +103,3 @@ class DatasetInterface(object):
 
             return train_init, valid_init, input_data, label
 
-    def get_data_v2(self, list_of_files_train, list_of_files_valid, b_size, augment=False, standardize=False,
-                    num_threads=4):
-        # TODO: questa va testata  << ----------------------------
-        # TODO: questa va testata  << ----------------------------
-        with tf.name_scope('data'):
-            train_filenames = tf.constant(list_of_files_train)
-            valid_filenames = tf.constant(list_of_files_valid)
-
-            train_data = tf.data.Dataset.from_tensor_slices(train_filenames)
-
-            train_data = train_data.apply(tf.contrib.data.shuffle_and_repeat(buffer_size=len(list_of_files_train)))
-            train_data = train_data.apply(
-                tf.contrib.data.map_and_batch(lambda filename: tf.py_func(  # provare Dataset.from_generator
-                    self._parse_nifti_data,
-                    [filename, standardize, augment],
-                    [tf.float32, tf.bool]), batch_size=b_size, num_parallel_batches=1))
-
-            valid_data = tf.data.Dataset.from_tensor_slices(valid_filenames)
-            valid_data = valid_data.map(lambda filename: tf.py_func(
-                self._parse_nifti_data,
-                [filename, standardize, False],
-                [tf.float32, tf.bool]), num_parallel_calls=num_threads)
-
-            train_data.prefetch(buffer_size=2)  # il numero dipende dalle prestazioni complessive
-
-            iterator = tf.data.Iterator.from_structure(train_data.output_types, train_data.output_shapes)
-            input_data, label = iterator.get_next()
-            train_init = iterator.make_initializer(train_data)  # initializer for train_data
-            test_init = iterator.make_initializer(valid_data)  # initializer for train_data
-
-            input_data = tf.reshape(input_data, shape=[-1, 256, 256, 1])
-            label = tf.cast(tf.reshape(label, shape=[-1, 256, 256, 2]), tf.int8)
-
-            return (train_init, test_init), (input_data, label)

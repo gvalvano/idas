@@ -1,6 +1,3 @@
-<head>
- <meta charset='utf-8'>
-</head>
 
 <b>Imaging and DAta Science package.</b>
 ___________________________
@@ -9,7 +6,7 @@ It has been developed in the course of research activities and it has to be inte
 
 For its use, in addition to the most common Python libraries, the installation of Tensorflow is required.
 
-If you intend to use this code, please cite me &U+1F601 :) 
+If you intend to use this code, please cite me :) 
 
 Author:
 <b>Gabriele Valvano</b>

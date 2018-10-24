@@ -1,23 +1,20 @@
 """
-General structure for neural networks in tensorflow.
+Example of generic structure to write neural networks in tensorflow.
 """
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import time
-import utils
 import tensorflow as tf
-from idas.data_set_interface import DatasetInterface
 import errno
 from idas.callbacks import callbacks as tf_callbacks
 from idas.callbacks.dsd_callback import DSDCallback
 from idas.callbacks.routine_callback import RoutineCallback
 
 
-import config_file_ae
-FLAGS = config_file_ae.define_flags()
+FLAGS = None  # config_file.define_flags()
 
 
-class ConvNet(DatasetInterface):
+class ConvNet:  # (DatasetInterface)
     def __init__(self):
         self.lr = FLAGS.lr  # learning rate
         self.batch_size = FLAGS.b_size

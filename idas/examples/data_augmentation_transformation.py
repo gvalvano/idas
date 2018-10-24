@@ -16,10 +16,7 @@ def one_hot_encode(y, nb_classes):
 
 if __name__ == '__main__':
 
-    fnames = ['/Users/gabrielevalvano/Desktop/data_set/cervelli/NFBS_Dataset/volumes/train/A00028185/sub-A00028185_ses-NFB3_T1w',
-              '/Users/gabrielevalvano/Desktop/data_set/cervelli/NFBS_Dataset/volumes/train/A00057808/sub-A00057808_ses-NFB3_T1w',
-              '/Users/gabrielevalvano/Desktop/data_set/cervelli/NFBS_Dataset/volumes/train/A00051676/sub-A00051676_ses-NFB3_T1w'
-              ]
+    fnames = ['NFBS_Dataset/volumes/train/A00028185/sub-A00028185_ses-NFB3_T1w']
 
     x_batch = []
     y_batch = []

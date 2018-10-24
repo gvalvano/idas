@@ -1,8 +1,8 @@
 """
 Utilities for sqlite database data
 """
-# TODO: questo file è incompleto
-# Codice scritto per caso specifico in cui la tabella ha soltanto 2 colonne (row_id, values)
+# TODO: this is an incomplete code
+# written for the specific case of a 2 columns table (row_id, values)
 
 import sqlite3
 

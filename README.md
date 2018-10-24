@@ -10,5 +10,5 @@ For its use, in addition to the most common Python libraries, the installation o
 
 If you intend to use this code, please cite me :) 
 
-For any bug, typo, or other problem you can sand me a message.
-Click <a href="https://gitlab.com/gabriele_valvano">here</a> to get to my profile on GitLab.
+For any errors, typos or code improvement, please send me a message. You can find my email address in one of my pubblications.
+You can click <a href="https://gitlab.com/gabriele_valvano">here</a> to get to my profile on GitLab.

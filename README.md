@@ -9,7 +9,7 @@ It has been developed in the course of research activities and it has to be inte
 
 For its use, in addition to the most common Python libraries, the installation of Tensorflow is required.
 
-If you intend to use this code, please cite me U+1F601 :) 
+If you intend to use this code, please cite me &U+1F601 :) 
 
 Author:
 <b>Gabriele Valvano</b>

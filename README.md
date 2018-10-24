@@ -7,9 +7,6 @@ For its use, in addition to the most common Python libraries, the installation o
 
 If you intend to use this code, please cite me :) 
 
-Author:
-
-<b>Gabriele Valvano</b>
-
+Author: <b>Gabriele Valvano</b>
 
 Click <a href="https://gitlab.com/gabriele_valvano">here</a> to get to my profile on GitLab.

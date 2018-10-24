@@ -1,3 +1,3 @@
 Imaging and DAta Science package.
 ___________________________
-<i> This package containst python code utilities for several Deep Learning applications. <\i>
+<i> This package contains Python code utilities for many Deep Learning applications. <\i>

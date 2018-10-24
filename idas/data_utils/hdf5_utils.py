@@ -1,7 +1,7 @@
 """
 Utilities for hdf5 data
 """
-# TODO: questo file è incompleto
+# TODO: file to be completed
 
 import h5py
 import os

@@ -2,10 +2,10 @@
 For the guide refer to: https://www.marcodena.it/blog/telegram-logging-handler-for-python-java-bash/
 - - - - - - -
 bot page:
-https://api.telegram.org/bot696365945:AAEZgDVuEkc7SF1iqbT0zR2YolbCvUwdfT4/getUpdates
+https://api.telegram.org/ [...]
 - - - - - - -
 bot info:
-curl -X GET https://api.telegram.org/bot696365945:AAEZgDVuEkc7SF1iqbT0zR2YolbCvUwdfT4/getMe
+curl -X GET https://api.telegram.org/ [...]
 - - - - - - -
 send message to the bot:
 curl -s -X POST https://api.telegram.org/bot[TOKENID]/sendMessage -d chat_id=[ID] -d text="Hello world"
@@ -17,8 +17,8 @@ from logging import Handler, Formatter
 import logging
 # from time import strftime
 
-TELEGRAM_TOKEN = '696365945:AAEZgDVuEkc7SF1iqbT0zR2YolbCvUwdfT4'  # 'PUT HERE YOUR TOKEN-ID'
-TELEGRAM_CHAT_ID = '171620634'  # 'PUT HERE YOUR CHAT-ID'
+TELEGRAM_TOKEN = '[...]'  # 'PUT HERE YOUR TOKEN-ID'
+TELEGRAM_CHAT_ID = '[...]'  # 'PUT HERE YOUR CHAT-ID'
 
 
 class RequestsHandler(Handler):

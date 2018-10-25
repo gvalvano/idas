@@ -2,10 +2,10 @@
 For the guide refer to: https://www.marcodena.it/blog/telegram-logging-handler-for-python-java-bash/
 - - - - - - -
 bot page:
-https://api.telegram.org/ [...]
+https://api.telegram.org/bot[TOKENID]/getUpdates
 - - - - - - -
 bot info:
-curl -X GET https://api.telegram.org/ [...]
+curl -X GET https://api.telegram.org/bot[TOKENID]/getMe
 - - - - - - -
 send message to the bot:
 curl -s -X POST https://api.telegram.org/bot[TOKENID]/sendMessage -d chat_id=[ID] -d text="Hello world"

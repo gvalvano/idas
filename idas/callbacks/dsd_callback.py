@@ -16,17 +16,14 @@ def run_sparse_step(sess, sparsity=0.30):
     print("Thresholding elements below chosen value (Sparsity {0}%)".format(sparsity * 100))
     layers = [v.name for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES) if v.name.endswith('kernel:0')]
     for lyr in layers:
-        # remove from the list the firsts few layers and mask the others:
-        if not (lyr.startswith('input_interface') or lyr.startswith('output_interface')):
-            # also removed the final layers weights from the list because this is a U-net
-            layer = sess.graph.get_tensor_by_name(lyr)
-            flat_layer = tf.reshape(layer, [-1])
-            N = tf.to_float(tf.shape(flat_layer)[0])
-            k = tf.to_int32(N * (1. - tf.constant(sparsity, dtype=tf.float32)))
-            values, indices = tf.nn.top_k(tf.abs(flat_layer), k=k)
-            _lambda = tf.reduce_min(values)
+        layer = sess.graph.get_tensor_by_name(lyr)
+        flat_layer = tf.reshape(layer, [-1])
+        N = tf.to_float(tf.shape(flat_layer)[0])
+        k = tf.to_int32(N * (1. - tf.constant(sparsity, dtype=tf.float32)))
+        values, indices = tf.nn.top_k(tf.abs(flat_layer), k=k)
+        _lambda = tf.reduce_min(values)
 
-            sess.run(tf.assign(layer, tf.multiply(layer, tf.to_float(tf.abs(layer) >= _lambda))))
+        sess.run(tf.assign(layer, tf.multiply(layer, tf.to_float(tf.abs(layer) >= _lambda))))
 
 
 class DSDCallback(Callback):

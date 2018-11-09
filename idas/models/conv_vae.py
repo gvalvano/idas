@@ -40,11 +40,11 @@ class ConvVAE:
             features = tf.contrib.layers.flatten(conv2_bn)
 
             z_mean = dense(features, units=self.n_latent, name='z_mean_dense')
-            z_logstd = dense(features, units=self.n_latent, name='z_stddev_dense')
+            z_logvar = dense(features, units=self.n_latent, name='z_stddev_dense')
 
-        return z_mean, z_logstd
+        return z_mean, z_logvar
 
-    def _generative_model(self, z_mean, z_logstd):
+    def _generative_model(self, z_mean, z_logvar):
         """ Generate probabilistic decoder (decoder network), mapping points from the latent space into a distribution
         in data space. The transformation is parametrized and can be learned.
         """
@@ -58,7 +58,7 @@ class ConvVAE:
 
             # sample from normal distribution:
             eps = tf.random_normal(latent_shape, dtype=tf.float32, mean=0., stddev=1.0, name='epsilon')
-            z = z_mean + eps * tf.exp(0.5 * z_logstd)
+            z = z_mean + eps * tf.exp(0.5 * z_logvar)
 
             # convolutional layers:
             conv1t = conv2d_transpose(z, filters=128, kernel_size=2, strides=2, padding='same',
@@ -78,10 +78,10 @@ class ConvVAE:
         with tf.variable_scope('Variational_AE'):
 
             # Recognition model: map to latent space distribution
-            self.z_mean, self.z_logstd = self._recognition_model()
+            self.z_mean, self.z_logvar = self._recognition_model()
 
             # Generative model: map from latent space to pixel space
-            prediction = self._generative_model(self.z_mean, self.z_logstd)
+            prediction = self._generative_model(self.z_mean, self.z_logvar)
 
             self.prediction = prediction
 
@@ -101,7 +101,7 @@ class ConvVAE:
 
         # _______
         # KL Divergence loss:
-        kl_div_loss = 1.0 + self.z_logstd - tf.square(self.z_mean) - tf.exp(self.z_logstd)
+        kl_div_loss = 1.0 + self.z_logvar - tf.square(self.z_mean) - tf.exp(self.z_logvar)
         kl_div_loss = -0.5 * tf.reduce_sum(kl_div_loss, 1)
         self.latent_loss = kl_div_loss
 

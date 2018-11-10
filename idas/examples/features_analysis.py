@@ -34,7 +34,7 @@ if __name__ == '__main__' or True:
     img_in = test_data.reshape([-1, 28, 28, 1])
 
     # latent AE activations
-    X = model.eval_layer_activation(img_in, 'Latent_AE/secondary_latent_features/swish_f32:0')
+    X = model.eval_layer_activation(img_in, 'layer_name/swish_f32:0')
 
     Corr = np.corrcoef(X).astype(np.float16)  # np.matmul(X, np.transpose(X))
 

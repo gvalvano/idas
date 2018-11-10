@@ -14,14 +14,23 @@ from idas.callbacks.routine_callback import RoutineCallback
 FLAGS = None  # config_file.define_flags()
 
 
-class ConvNet:  # (DatasetInterface)
-    def __init__(self):
-        self.lr = FLAGS.lr  # learning rate
+class ConvNet:  # (DatasetInterface):
+    def __init__(self, run_id=None):
+        super().__init__()
+
+        # check weather to take a specific RUN_ID
+        if run_id is not None:
+            FLAGS.RUN_ID = run_id
+        self.run_id = FLAGS.RUN_ID
+
+        self.lr = tf.Variable(FLAGS.lr, dtype=tf.float32, trainable=False, name='learning_rate')  # learning rate
         self.batch_size = FLAGS.b_size
+        self.global_epoch = 0
 
         # path to save checkpoints and graph
         self.checkpoint_dir = './results/checkpoints/' + FLAGS.RUN_ID
         self.graph_dir = './results/graphs/' + FLAGS.RUN_ID + '/convnet'
+        self.history_log_dir = './results_mnist/history_logs/' + FLAGS.RUN_ID
 
         # list of path for the training and validation files:
         self.list_of_files_train = FLAGS.list_of_files_train
@@ -29,7 +38,7 @@ class ConvNet:  # (DatasetInterface)
 
         # init the list of callbacks to be called and relative arguments
         self.callbacks = []
-        self.callbacks_kwargs = {}
+        self.callbacks_kwargs = {'history_log_dir': self.history_log_dir}
 
         # routine callback always runs:
         self.callbacks.append(RoutineCallback())
@@ -47,9 +56,9 @@ class ConvNet:  # (DatasetInterface)
         self.g_epoch = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_epoch')
 
         # other variables:
-        self.is_training = True  # weather we are in training or test mode (needed for the behaviour of dropout, BN, ecc.)
+        self.is_training = tf.placeholder(dtype=tf.bool, name='is_training')  # training or test mode (needed for the behaviour of dropout, BN, ecc.)
         self.skip_step = FLAGS.skip_step  # frequency of batch report
-        self.tensorboard_verbose = True  # if True: save also layers weights at the end of epoch
+        self.tensorboard_verbose = FLAGS.tensorboard_verbose  # if True: save also layers weights at the end of epoch
 
     def get_data(self, num_threads, *kwargs):
         """ 
@@ -162,7 +171,6 @@ class ConvNet:  # (DatasetInterface)
         """ train_set the model for one epoch. """
         start_time = time.time()
         sess.run(init)
-        self.is_training = True
         total_loss = 0
         total_correct_preds = 0
         n_batches = 0
@@ -170,7 +178,8 @@ class ConvNet:  # (DatasetInterface)
             while True:
                 caller.on_batch_begin(training_state=True)
 
-                _, l, a, summaries = sess.run([self.train_op, self.loss, self.accuracy, self.train_summary_op])
+                _, l, a, summaries = sess.run([self.train_op, self.loss, self.accuracy, self.train_summary_op],
+                                           feed_dict={self.is_training: True})  # 'is_training:0':
                 writer.add_summary(summaries, global_step=step)
                 step += 1
                 total_loss += l
@@ -199,7 +208,6 @@ class ConvNet:  # (DatasetInterface)
         """ Eval the model once """
         start_time = time.time()
         sess.run(init)
-        self.is_training = False
         total_correct_preds = 0
         total_loss = 0
         n_batches = 0
@@ -207,7 +215,8 @@ class ConvNet:  # (DatasetInterface)
             while True:
                 caller.on_batch_begin(training_state=False)
 
-                loss_batch, accuracy_batch, summaries = sess.run([self.loss, self.accuracy, self.valid_summary_op])
+                loss_batch, accuracy_batch, summaries = sess.run([self.loss, self.accuracy, self.valid_summary_op],
+                                                 feed_dict={self.is_training: False})
                 writer.add_summary(summaries, global_step=step)
                 step += 1
                 total_loss += loss_batch
@@ -231,7 +240,6 @@ class ConvNet:  # (DatasetInterface)
 
     def test(self, input_data):
         """ Test the model on input_data """
-        self.is_training = False
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             sess.run(tf.local_variables_initializer())
@@ -239,7 +247,8 @@ class ConvNet:  # (DatasetInterface)
             ckpt = tf.train.get_checkpoint_state(os.path.dirname(self.checkpoint_dir + '/checkpoint'))
             if ckpt and ckpt.model_checkpoint_path:
                 saver.restore(sess, ckpt.model_checkpoint_path)
-                output = sess.run(tf.argmax(self.logits, -1), feed_dict={self.input_data: input_data})
+                output = sess.run(tf.argmax(self.logits, -1), feed_dict={self.input_data: input_data,
+                                                                              self.is_training: False})
                 return output
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),

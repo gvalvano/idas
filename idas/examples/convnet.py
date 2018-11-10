@@ -213,6 +213,25 @@ class ConvNet:  # (DatasetInterface):
               'seconds'.format(' '*3, avg_loss, avg_acc, delta_t))
         return step
 
+    def eval_layer_activation(self, input_data, layer_name):
+        """ Test the model on input_data
+        layer_name = name_scope of the layer to evaluate
+        i.e. layer_name = 'network/layer_conv1/Relu:0'  (notice ':0' at the end)
+        """
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            sess.run(tf.local_variables_initializer())
+            saver = tf.train.Saver()
+            ckpt = tf.train.get_checkpoint_state(os.path.dirname(self.checkpoint_dir + '/checkpoint'))
+            if ckpt and ckpt.model_checkpoint_path:
+                saver.restore(sess, ckpt.model_checkpoint_path)
+                layer = tf.get_default_graph().get_tensor_by_name(layer_name)
+                output = sess.run(layer, feed_dict={self.input_data: input_data, self.is_training: False})
+                return output
+            else:
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), self.checkpoint_dir +
+                                        ' (checkpoint_dir)')
+
     def eval_once(self, sess, init, writer, step, caller):
         """ Eval the model once """
         start_time = time.time()

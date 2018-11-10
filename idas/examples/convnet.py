@@ -31,7 +31,7 @@ class ConvNet:  # (DatasetInterface):
         # path to save checkpoints and graph
         self.checkpoint_dir = './results/checkpoints/' + FLAGS.RUN_ID
         self.graph_dir = './results/graphs/' + FLAGS.RUN_ID + '/convnet'
-        self.history_log_dir = './results_mnist/history_logs/' + FLAGS.RUN_ID
+        self.history_log_dir = './mnist_exp/results_mnist/history_logs/' + FLAGS.RUN_ID
 
         # list of path for the training and validation files:
         self.list_of_files_train = FLAGS.list_of_files_train
@@ -50,6 +50,14 @@ class ConvNet:  # (DatasetInterface):
             self.callbacks.append(DSDCallback())
             self.callbacks_kwargs['sparsity'] = FLAGS.sparsity
             self.callbacks_kwargs['beta'] = FLAGS.beta
+
+        # eventually add the callback to perform learning rate annealing:
+        self.perform_lr_annealing = FLAGS.perform_lr_annealing
+        if self.perform_lr_annealing:
+            self.callbacks.append(LrAnnealingCallback())
+            self.callbacks_kwargs['annealing_strategy'] = FLAGS.annealing_strategy
+            self.callbacks_kwargs['annealing_epoch_delay'] = FLAGS.annealing_epoch_delay
+            self.callbacks_kwargs['annealing_parameters'] = FLAGS.annealing_parameters
 
         # Define global step for training e validation and counter for global epoch:
         self.g_train_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_train_step')
@@ -177,7 +185,7 @@ class ConvNet:  # (DatasetInterface):
         n_batches = 0
         try:
             while True:
-                caller.on_batch_begin(training_state=True)
+                caller.on_batch_begin(training_state=True, **self.callbacks_kwargs)
 
                 _, l, a, summaries = sess.run([self.train_op, self.loss, self.accuracy, self.train_summary_op],
                                            feed_dict={self.is_training: True})  # 'is_training:0':
@@ -190,7 +198,7 @@ class ConvNet:  # (DatasetInterface):
                     print('\r  ...training over batch {1}: {0} batch_loss = {2:.4f} {0} batch_accuracy = {3:.4f}'
                           .format(' '*3, n_batches, l, a), end='\n')
 
-                caller.on_batch_end(training_state=True)
+                caller.on_batch_end(training_state=True, **self.callbacks_kwargs)
         except tf.errors.OutOfRangeError:
             # Fine dell'epoca. Qui valutare eventuali statistiche, fare log, ecc..
             avg_loss = total_loss/n_batches
@@ -214,7 +222,7 @@ class ConvNet:  # (DatasetInterface):
         n_batches = 0
         try:
             while True:
-                caller.on_batch_begin(training_state=False)
+                caller.on_batch_begin(training_state=False, **self.callbacks_kwargs)
 
                 loss_batch, accuracy_batch, summaries = sess.run([self.loss, self.accuracy, self.valid_summary_op],
                                                  feed_dict={self.is_training: False})
@@ -224,7 +232,7 @@ class ConvNet:  # (DatasetInterface):
                 total_correct_preds += accuracy_batch
                 n_batches += 1
 
-                caller.on_batch_end(training_state=False)
+                caller.on_batch_end(training_state=False, **self.callbacks_kwargs)
         except tf.errors.OutOfRangeError:
             # Fine del validation_set set. Qui valutare eventuali statistiche, fare log, ecc..
             avg_loss = total_loss/n_batches
@@ -299,19 +307,19 @@ class ConvNet:  # (DatasetInterface):
                 caller.on_epoch_begin(training_state=True, **self.callbacks_kwargs)
 
                 t_step = self.train_one_epoch(sess, self.train_init, writer, t_step, caller)
-                caller.on_epoch_end(training_state=True)
+                caller.on_epoch_end(training_state=True, **self.callbacks_kwargs)
 
                 v_step = self.eval_once(sess, self.valid_init, writer, v_step, caller)
 
                 # save updated variables and weights
                 saver.save(sess, self.checkpoint_dir + '/checkpoint', t_step)
 
-                if self.tensorboard_verbose and (epoch % 20 == 0):
+                if self.tensorboard_verbose and (epoch % 50 == 0):
                     # writing summary for the weights:
                     summary = sess.run(self.weights_summary)
                     writer.add_summary(summary, global_step=t_step)
 
-            caller.on_train_end(training_state=True)
+            caller.on_train_end(training_state=True, **self.callbacks_kwargs)
         writer.close()
 
 

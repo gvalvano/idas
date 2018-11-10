@@ -9,6 +9,7 @@ import errno
 from idas.callbacks import callbacks as tf_callbacks
 from idas.callbacks.dsd_callback import DSDCallback
 from idas.callbacks.routine_callback import RoutineCallback
+import numpy as np
 
 
 FLAGS = None  # config_file.define_flags()
@@ -77,9 +78,9 @@ class ConvNet:  # (DatasetInterface):
     def inference(self):
         """ 
         Use this function to define the network architecture and define: 
-         self.logits = output layer
+         self.output_data = output layer
         """
-        self.logits = None
+        self.output_data = None
         raise NotImplementedError
 
     def loss(self):
@@ -92,14 +93,14 @@ class ConvNet:  # (DatasetInterface):
         """
         # with tf.name_scope('weighted_cross_entropy'):
         #     weights = np.array([0.085, 0.915])
-        #     epsilon = tf.constant(1e-12, dtype=self.logits.dtype)
+        #     epsilon = tf.constant(1e-12, dtype=self.output_data.dtype)
         #     print("Loss function: 'weighted cross_entropy', weights = \033[94m{0}\033[0m".format(weights))
         #
-        #     num_classes = self.logits.get_shape().as_list()[-1]  # class on the last index
+        #     num_classes = self.output_data.get_shape().as_list()[-1]  # class on the last index
         #     assert (num_classes is not None)
         #     assert len(weights) == num_classes
         #
-        #     y_pred = tf.reshape(self.logits, (-1, num_classes))
+        #     y_pred = tf.reshape(self.output_data, (-1, num_classes))
         #     y_true = tf.to_float(tf.reshape(self.labels, (-1, num_classes)))
         #     softmax = tf.nn.softmax(y_pred) + epsilon
         #
@@ -143,7 +144,7 @@ class ConvNet:  # (DatasetInterface):
         """
         with tf.name_scope('predict'):
             # Accuracy metric:
-            preds = tf.nn.softmax(self.logits)
+            preds = tf.nn.softmax(self.output_data)
             correct_preds = tf.equal(tf.argmax(preds, -1), tf.argmax(self.labels, -1))
             self.accuracy = tf.reduce_mean(tf.cast(correct_preds, tf.float32))
 
@@ -168,7 +169,7 @@ class ConvNet:  # (DatasetInterface):
         self.summary()
 
     def train_one_epoch(self, sess, init, writer, step, caller):
-        """ train_set the model for one epoch. """
+        """ train the model for one epoch. """
         start_time = time.time()
         sess.run(init)
         total_loss = 0
@@ -185,8 +186,8 @@ class ConvNet:  # (DatasetInterface):
                 total_loss += l
                 total_correct_preds += a
                 n_batches += 1
-                if (n_batches + 1) % self.skip_step == 0:
-                    print('\r  ...training over batch {1}: {0} batch_loss = {2:.3f} {0} batch_accuracy = {3:.3f}'
+                if (n_batches % self.skip_step) == 0:
+                    print('\r  ...training over batch {1}: {0} batch_loss = {2:.4f} {0} batch_accuracy = {3:.4f}'
                           .format(' '*3, n_batches, l, a), end='\n')
 
                 caller.on_batch_end(training_state=True)
@@ -200,8 +201,8 @@ class ConvNet:  # (DatasetInterface):
         # update global epoch counter:
         sess.run(self.g_epoch.assign_add(1))
 
-        print('\033[31m  TRAIN\033[0m:{0}{0} average loss = {1:.3f} {0} average accuracy = {2:.3f} {0} Took: {3:.3f} seconds'
-              .format(' '*3, avg_loss, avg_acc, delta_t))
+        print('\033[31m  TRAIN\033[0m:{0}{0} average loss = {1:.4f} {0} average accuracy = {2:.4f} {0} Took: {3:.3f} '
+              'seconds'.format(' '*3, avg_loss, avg_acc, delta_t))
         return step
 
     def eval_once(self, sess, init, writer, step, caller):
@@ -234,32 +235,45 @@ class ConvNet:  # (DatasetInterface):
         # update global epoch counter:
         sess.run(self.g_valid_step.assign(step))
 
-        print('\033[31m  VALIDATION\033[0m:  average loss = {1:.3f} {0} average accuracy = {2:.3f} {0} Took: {3:.3f} seconds'
-              .format(' '*3, avg_loss, avg_acc, delta_t))
+        print('\033[31m  VALIDATION\033[0m:  average loss = {1:.4f} {0} average accuracy = {2:.4f} {0} Took: {3:.3f} '
+              'seconds'.format(' '*3, avg_loss, avg_acc, delta_t))
         return step
 
     def test(self, input_data):
         """ Test the model on input_data """
+
+        if self.stdz:
+            mu, sigma = np.mean(input_data), np.std(input_data)
+            input_data = (input_data - mu) / sigma
+
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             sess.run(tf.local_variables_initializer())
+            sess.run(self.valid_init)
+
             saver = tf.train.Saver()
             ckpt = tf.train.get_checkpoint_state(os.path.dirname(self.checkpoint_dir + '/checkpoint'))
             if ckpt and ckpt.model_checkpoint_path:
                 saver.restore(sess, ckpt.model_checkpoint_path)
-                output = sess.run(tf.argmax(self.logits, -1), feed_dict={self.input_data: input_data,
+                output = sess.run(tf.argmax(self.output_data, -1), feed_dict={self.input_data: input_data,
                                                                               self.is_training: False})
+                # output = sess.run(self.output_data, feed_dict={self.input_data: input_data, self.is_training: False})
+
+                if self.stdz:
+                    mu, sigma = np.mean(input_data), np.std(input_data)
+                    output = output * sigma + mu
                 return output
             else:
                 raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                         self.checkpoint_dir + ' (checkpoint_dir)')
 
     def train(self, n_epochs):
-        """ The train_set function alternates between training one epoch and evaluating """
+        """ The train function alternates between training one epoch and evaluating """
         print("\nStarting network training... Number of epochs to train: \033[94m{0}\033[0m".format(n_epochs))
         print("Tensorboard verbose mode: \033[94m{0}\033[0m".format(self.tensorboard_verbose))
         print("Tensorboard dir: \033[94m{0}\033[0m".format(self.graph_dir))
         utils.safe_mkdir(self.checkpoint_dir)
+        utils.safe_mkdir(self.history_log_dir)
         writer = tf.summary.FileWriter(self.graph_dir, tf.get_default_graph())
 
         with tf.Session() as sess:

@@ -218,6 +218,10 @@ class ConvNet:  # (DatasetInterface):
         layer_name = name_scope of the layer to evaluate
         i.e. layer_name = 'network/layer_conv1/Relu:0'  (notice ':0' at the end)
         """
+        if self.stdz:
+            mu, sigma = np.mean(input_data), np.std(input_data)
+            input_data = (input_data - mu) / sigma
+
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
             sess.run(tf.local_variables_initializer())
@@ -229,8 +233,8 @@ class ConvNet:  # (DatasetInterface):
                 output = sess.run(layer, feed_dict={self.input_data: input_data, self.is_training: False})
                 return output
             else:
-                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), self.checkpoint_dir +
-                                        ' (checkpoint_dir)')
+                raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
+                                        self.checkpoint_dir + ' (checkpoint_dir)')
 
     def eval_once(self, sess, init, writer, step, caller):
         """ Eval the model once """

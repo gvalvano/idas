@@ -20,6 +20,8 @@ def safe_mkdir(path):
         pass
 
 
-def print_yellow_text(text):
+def print_yellow_text(text, sep=True):
     """ useful for debug """
-    print('_' * 40 + '\n\033[1;33m{0}:\033[0m'.format(text))
+    if sep:
+        print('_' * 40)  # line separator
+    print('\033[1;33m{0}:\033[0m'.format(text))

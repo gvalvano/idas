@@ -21,6 +21,5 @@ def safe_mkdir(path):
 
 
 def print_yellow_text(text):
+    """ useful for debug """
     print('_' * 40 + '\n\033[1;33m{0}:\033[0m'.format(text))
-
-

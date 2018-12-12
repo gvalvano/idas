@@ -2,7 +2,7 @@ import tensorflow as tf
 from math import pi
 
 
-def _data_augmentation_ops(x_train, y_train):
+def data_augmentation_ops(x_train, y_train):
     """ Data augmentation pipeline (to be applied on training samples)
     """
     # shape = x_train.shape  # == y_train.shape

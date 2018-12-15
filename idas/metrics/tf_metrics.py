@@ -86,3 +86,18 @@ def vae_loss(z_mean, z_logstd, y_true, y_pred, n_outputs):
     total_loss = tf.reduce_mean(generator_loss + kl_div_loss)
 
     return total_loss, generator_loss, kl_div_loss
+
+
+def gradient_loss(y_true, y_pred):
+    """
+    Computes gradient loss as the mean square error on the sobel filtered image
+    # TODO: update implementation to make it work for any input dimension
+    """
+    pred_grad = tf.reduce_sum(tf.image.sobel_edges(y_pred[:, :, :, 0]), -1)
+    input_grad = tf.reduce_sum(tf.image.sobel_edges(y_true[:, :, :, 0]), -1)
+    
+    x_reconstructed_grad = tf.reshape(pred_grad, shape=(-1, 128*128))
+    x_true_grad = tf.reshape(input_grad, shape=(-1, 128*128))
+
+    gradient_loss = tf.reduce_mean(tf.squared_difference(x_reconstructed_grad, x_true_grad), 1)
+    return gradient_loss

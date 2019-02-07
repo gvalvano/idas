@@ -17,6 +17,7 @@ import ast
 import os
 from idas.callbacks.callbacks import Callback
 import idas.logger.json_logger as jlogger
+import tensorflow as tf
 
 
 def apply_step_decay(params, t):
@@ -84,6 +85,10 @@ class LrAnnealingCallback(Callback):
                     'last_learning_rate': ast.literal_eval(kwargs['annealing_parameters'])['lr0']}
             jlogger.add_new_node('LR_ANNEALING', vals, fname=self.history_log_file)
 
+        # define update operation:
+        up_value = tf.placeholder(tf.float32, None, name='update_lr_value')
+        self.update_lr = cnn.lr.assign(up_value, name='update_lr')
+
     def on_epoch_end(self, training_state, **kwargs):
 
         cnn = kwargs['cnn']
@@ -105,11 +110,11 @@ class LrAnnealingCallback(Callback):
             updated_lr = call_strategy[kwargs['annealing_strategy']](params, curr_epoch)
 
             if updated_lr != params['curr_lr']:
-                print("\n\033[94mAnnealing the learning rate with strategy '{0}'...\033[0m".format(
-                    kwargs['annealing_strategy']))
+                print("\n\033[94mAnnealing the learning rate with strategy '{0}'... "
+                      "New value = {1:0.2e}\033[0m".format(kwargs['annealing_strategy'], updated_lr))
 
                 # cnn.lr = updated_lr
-                kwargs['sess'].run(cnn.lr.assign(updated_lr))
+                kwargs['sess'].run(self.update_lr, feed_dict={'update_lr_value:0': updated_lr})
 
                 jlogger.update_node('LR_ANNEALING', sub_key='last_learning_rate', sub_value=updated_lr,
                                     fname=self.history_log_file)

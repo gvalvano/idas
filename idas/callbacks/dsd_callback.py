@@ -23,6 +23,7 @@ def run_sparse_step(sess, sparsity=0.30):
         values, indices = tf.nn.top_k(tf.abs(flat_layer), k=k)
         _lambda = tf.reduce_min(values)
 
+        # TODO: define outside tf.assign() operation to avoid adding a new node to the graph every time we call it
         sess.run(tf.assign(layer, tf.multiply(layer, tf.to_float(tf.abs(layer) >= _lambda))))
 
 

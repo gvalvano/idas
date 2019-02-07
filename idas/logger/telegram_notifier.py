@@ -17,19 +17,22 @@ from logging import Handler, Formatter
 import logging
 # from time import strftime
 
-TELEGRAM_TOKEN = '[...]'  # 'PUT HERE YOUR TOKEN-ID'
-TELEGRAM_CHAT_ID = '[...]'  # 'PUT HERE YOUR CHAT-ID'
-
 
 class RequestsHandler(Handler):
+
+    def __init__(self, chat_id, token_id):
+        super().__init__()
+        self.chat_id = chat_id
+        self.token_id = token_id
+
     def emit(self, record):
         log_entry = self.format(record)
         payload = {
-            'chat_id': TELEGRAM_CHAT_ID,
+            'chat_id': self.chat_id,
             'text': log_entry,
             'parse_mode': 'HTML'
         }
-        return requests.post("https://api.telegram.org/bot{token}/sendMessage".format(token=TELEGRAM_TOKEN),
+        return requests.post("https://api.telegram.org/bot{token}/sendMessage".format(token=self.token_id),
                              data=payload).content
         
 
@@ -43,11 +46,11 @@ class LogstashFormatter(Formatter):
         return "{message}".format(message=record.msg)
 
 
-def basic_notifier(logger_name, message, level=logging.INFO):
+def basic_notifier(logger_name, token_id, chat_id, message, level=logging.INFO):
     logger = logging.getLogger(logger_name)
     logger.setLevel(level)
 
-    handler = RequestsHandler()
+    handler = RequestsHandler(token_id, chat_id)
     formatter = LogstashFormatter()
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -59,4 +62,6 @@ def basic_notifier(logger_name, message, level=logging.INFO):
 if __name__ == '__main__':
     l_name = 'trymeApp'
     l_msg = 'We have a problem'
-    basic_notifier(l_name, l_msg)
+    t_id = 'insert here your token id'
+    c_id = 'insert here your chat id'
+    basic_notifier(logger_name=l_name, token_id=t_id, chat_id=c_id, message=l_msg)

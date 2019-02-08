@@ -20,10 +20,10 @@ import logging
 
 class RequestsHandler(Handler):
 
-    def __init__(self, chat_id, token_id):
+    def __init__(self, token_id, chat_id):
         super().__init__()
-        self.chat_id = chat_id
         self.token_id = token_id
+        self.chat_id = chat_id
 
     def emit(self, record):
         log_entry = self.format(record)
@@ -50,7 +50,7 @@ def basic_notifier(logger_name, token_id, chat_id, message, level=logging.INFO):
     logger = logging.getLogger(logger_name)
     logger.setLevel(level)
 
-    handler = RequestsHandler(token_id, chat_id)
+    handler = RequestsHandler(token_id=token_id, chat_id=chat_id)
     formatter = LogstashFormatter()
     handler.setFormatter(formatter)
     logger.addHandler(handler)

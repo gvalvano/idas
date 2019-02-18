@@ -107,3 +107,13 @@ def gradient_loss(y_true, y_pred):
 
     gradient_loss = tf.reduce_mean(tf.squared_difference(x_reconstructed_grad, x_true_grad), 1)
     return gradient_loss
+
+
+def hinge_loss(y_pred, y_true):
+    """ Hinge Loss.
+    Arguments:
+        y_pred: `Tensor` of `float` type. Predicted values.
+        y_true: `Tensor` of `float` type. Targets (labels).
+    """
+    with tf.name_scope("HingeLoss"):
+        return tf.reduce_mean(tf.maximum(1. - y_true * y_pred, 0.))

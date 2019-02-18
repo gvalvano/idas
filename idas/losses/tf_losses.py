@@ -117,3 +117,20 @@ def hinge_loss(y_pred, y_true):
     """
     with tf.name_scope("HingeLoss"):
         return tf.reduce_mean(tf.maximum(1. - y_true * y_pred, 0.))
+
+
+def contrastive_loss(y_pred, y_true, margin = 1.0):
+    """ Contrastive Loss.
+    
+        Computes the constrative loss between y_pred (logits) and y_true (labels).
+        http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf
+        Arguments:
+            y_pred: `Tensor`. Predicted values.
+            y_true: `Tensor`. Targets (labels).
+            margin: . A self-set parameters that indicate the distance between the expected different identity features. Defaults 1.
+    """
+
+    with tf.name_scope("ContrastiveLoss"):
+        dis1 = y_true * tf.square(y_pred)
+        dis2 = (1 - y_true) * tf.square(tf.maximum((margin - y_pred), 0))
+        return tf.reduce_sum(dis1 +dis2) / 2.

@@ -45,3 +45,97 @@ def dice_coe(output, target, loss_type='sorensen', axis=(1, 2, 3), smooth=1e-5):
     dice = (2. * inse + smooth) / (l + r + smooth)
     dice = tf.reduce_mean(dice, name='dice_coe')
     return dice
+
+
+def dice_hard_coe(output, target, threshold=0.5, axis=(1, 2, 3), smooth=1e-5):
+    """Non-differentiable Sørensen–Dice coefficient for comparing the similarity
+    of two batch of data, usually be used for binary image segmentation i.e. labels are binary.
+    The coefficient between 0 to 1, 1 if totally match.
+
+    Parameters
+    -----------
+    output : tensor
+        A distribution with shape: [batch_size, ....], (any dimensions).
+    target : tensor
+        The target distribution, format the same with `output`.
+    threshold : float
+        The threshold value to be true.
+    axis : tuple of integer
+        All dimensions are reduced, default ``(1,2,3)``.
+    smooth : float
+        This small value will be added to the numerator and denominator, see ``dice_coe``.
+
+    References
+    -----------
+    - `Wiki-Dice <https://en.wikipedia.org/wiki/Sørensen–Dice_coefficient>`__
+
+    """
+    output = tf.cast(output > threshold, dtype=tf.float32)
+    target = tf.cast(target > threshold, dtype=tf.float32)
+    inse = tf.reduce_sum(tf.multiply(output, target), axis=axis)
+    l = tf.reduce_sum(output, axis=axis)
+    r = tf.reduce_sum(target, axis=axis)
+    # old axis=[0,1,2,3]
+    # hard_dice = 2 * (inse) / (l + r)
+    # epsilon = 1e-5
+    # hard_dice = tf.clip_by_value(hard_dice, 0, 1.0-epsilon)
+    # new haodong
+    hard_dice = (2. * inse + smooth) / (l + r + smooth)
+    ##
+    hard_dice = tf.reduce_mean(hard_dice, name='hard_dice')
+    return hard_dice
+
+
+def iou_coe(output, target, threshold=0.5, axis=(1, 2, 3), smooth=1e-5):
+    """Non-differentiable Intersection over Union (IoU) for comparing the
+    similarity of two batch of data, usually be used for evaluating binary image segmentation.
+    The coefficient between 0 to 1, and 1 means totally match.
+
+    Parameters
+    -----------
+    output : tensor
+        A batch of distribution with shape: [batch_size, ....], (any dimensions).
+    target : tensor
+        The target distribution, format the same with `output`.
+    threshold : float
+        The threshold value to be true.
+    axis : tuple of integer
+        All dimensions are reduced, default ``(1,2,3)``.
+    smooth : float
+        This small value will be added to the numerator and denominator, see ``dice_coe``.
+
+    Notes
+    ------
+    - IoU cannot be used as training loss, people usually use dice coefficient for training, IoU and hard-dice for evaluating.
+
+    """
+    pre = tf.cast(output > threshold, dtype=tf.float32)
+    truth = tf.cast(target > threshold, dtype=tf.float32)
+    inse = tf.reduce_sum(tf.multiply(pre, truth), axis=axis)  # AND
+    union = tf.reduce_sum(tf.cast(tf.add(pre, truth) >= 1, dtype=tf.float32), axis=axis)  # OR
+    # old axis=[0,1,2,3]
+    # epsilon = 1e-5
+    # batch_iou = inse / (union + epsilon)
+    # new haodong
+    batch_iou = (inse + smooth) / (union + smooth)
+    iou = tf.reduce_mean(batch_iou, name='iou_coe')
+    return iou  # , pre, truth, inse, union
+
+
+def cosine_similarity(v1, v2):
+    """Cosine similarity [-1, 1].
+
+    Parameters
+    ----------
+    v1, v2 : Tensor
+        Tensor with the same shape [batch_size, n_feature].
+
+    References
+    ----------
+    - `Wiki <https://en.wikipedia.org/wiki/Cosine_similarity>`__.
+
+    """
+
+    return tf.reduce_sum(tf.multiply(v1, v2), 1) / \
+        (tf.sqrt(tf.reduce_sum(tf.multiply(v1, v1), 1)) *
+         tf.sqrt(tf.reduce_sum(tf.multiply(v2, v2), 1)))

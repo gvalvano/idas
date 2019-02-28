@@ -37,3 +37,12 @@ def print_yellow_text(text, sep=True):
     if sep:
         print('_' * 40)  # line separator
     print('\033[1;33m{0}:\033[0m'.format(text))
+
+
+def create_gif(gif_name, path, ext='.png', delay=30, loop=0):
+    """ Create gif from the list of images under the given path
+    On Mac OS X, it requires "brew install ImageMagick".
+    """
+    cmd = 'convert -delay {0} -loop {1} {2}/*{3} {4}.gif'.format(delay, loop, path, ext, gif_name)
+    os.system(cmd)
+    print('gif successfully saved as {0}.gif'.format(os.path.join(path, gif_name)))

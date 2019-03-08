@@ -46,3 +46,12 @@ def create_gif(gif_name, path, ext='.png', delay=30, loop=0):
     cmd = 'convert -delay {0} -loop {1} {2}/*{3} {4}.gif'.format(delay, loop, path, ext, gif_name)
     os.system(cmd)
     print('gif successfully saved as {0}.gif'.format(os.path.join(path, gif_name)))
+
+
+def get_shape(tensor):
+    """ It returns the static shape of a tensor when available, otherwise returns its dynamic shape. """
+    static_shape = tensor.shape.as_list()
+    dynamic_shape = tf.unstack(tf.shape(tensor))
+    dims = [s[1] if s[0] is None else s[0]
+            for s in zip(static_shape, dynamic_shape)]
+    return dims

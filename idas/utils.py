@@ -1,5 +1,6 @@
 import os
 from tensorflow.python.client import device_lib
+import tensorflow as tf
 
 
 def get_available_gpus():

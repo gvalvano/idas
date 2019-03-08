@@ -15,8 +15,17 @@ def get_shape(tensor):
     return dims
 
 
-def reshape(tensor, dims_list):
-    """ General purpose reshape function to collapse any list of dimensions
+def reshape_tensor(tensor, dims_list):
+    """ General purpose reshape function to collapse any list of dimensions.
+        .Example
+        We want to convert a Tensor of rank 3 to a tensor of rank 2 by collapsing the second and third dimensions
+        into one:
+          |  b = tf.placeholder(tf.float32, [None, 10, 32])
+          |  shape = get_shape(b)
+          |  b = tf.reshape(b, [shape[0], shape[1] * shape[2]])
+        With this function, we can easily write:
+          |  b = tf.placeholder(tf.float32, [None, 10, 32])
+          |  b = reshape(b, [0, [1, 2]])  # hence: collapse [1, 2] into the same dimension, leave 0 dimension unchanged
     """
     shape = get_shape(tensor)
     dims_prod = []

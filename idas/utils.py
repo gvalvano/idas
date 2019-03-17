@@ -44,6 +44,11 @@ def create_gif(gif_name, path, ext='.png', delay=30, loop=0):
     """ Create gif from the list of images under the given path
     On Mac OS X, it requires "brew install ImageMagick".
     """
-    cmd = 'convert -delay {0} -loop {1} {2}/*{3} {4}.gif'.format(delay, loop, path, ext, gif_name)
+    if path[-1] == '/':
+        path = path[:-1]
+    if gif_name[-4:] == '.gif':
+        gif_name = gif_name[:-4]
+        
+    cmd = 'convert -delay {0} -loop {1} {2}/*{3} {2}/{4}.gif'.format(delay, loop, path, ext, gif_name)
     os.system(cmd)
     print('gif successfully saved as {0}.gif'.format(os.path.join(path, gif_name)))

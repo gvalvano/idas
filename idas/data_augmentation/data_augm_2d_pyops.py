@@ -139,7 +139,7 @@ def _random_warping(x_batch, scale_limits, shear_limits, translation_limits, xcv
         if y_batch is not None:
             for l in range(n_labels):
                 _data_slice = y_batch[i][:, :, l]
-                if l == ycval:  # TODO: brutto
+                if l == ycval:
                     y_batch[i][:, :, l] = _apply_warping(_data_slice, tform, out_shape=(N, M), cval=1, order=0)
                 else:
                     y_batch[i][:, :, l] = _apply_warping(_data_slice, tform, out_shape=(N, M), cval=ycval, order=0)

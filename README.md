@@ -10,5 +10,13 @@ For its use, in addition to the most common Python libraries, the installation o
 
 If you intend to use this code, please cite me :) 
 
-For any errors, typos or code improvement, please send me a message. You can find my email address in one of my pubblications.
-You can click <a href="https://gitlab.com/gabriele_valvano">here</a> to get to my profile on GitLab.
+---------------------
+
+For problems, bugs, etc. please contact me at one of the following email addresses:
+
+  *gabriele.valvano@imtlucca.it* \
+  *g.valvano@sms.ed.ac.uk*
+
+Enjoy the code! :)
+
+**Gabriele**

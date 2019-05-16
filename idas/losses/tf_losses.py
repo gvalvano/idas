@@ -1,41 +1,57 @@
 import tensorflow as tf
-from idas.metrics.tf_metrics import dice_coe
+from idas.metrics.tf_metrics import dice_coe, jaccard_coe
 
 
-def dice_loss(output, target, loss_type='sorensen', axis=(1, 2, 3), smooth=1e-5):
-    """ returns dice (or jaccard) loss"""
-    return 1.0 - dice_coe(output, target, loss_type=loss_type, axis=axis, smooth=smooth)
+def l2_weights_regularization_loss(exclude_bias=False):
+    """ l2 regularization loss on all variables """
+    vars = tf.trainable_variables()
+    if exclude_bias:
+        loss = tf.add_n([tf.nn.l2_loss(v) for v in vars if 'bias' not in v.name])
+    else:
+        loss = tf.add_n([tf.nn.l2_loss(v) for v in vars])
+    return loss
 
 
-def weighted_cross_entropy(labels, logits):
+def dice_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
+    """ Returns Soft Sørensen–Dice loss """
+    return 1.0 - dice_coe(output, target, axis=axis, smooth=smooth)
+
+
+def jaccard_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
+    """ Returns Soft Jaccard (also known as Intersection over Union) loss.
+    Refs. https://arxiv.org/pdf/1608.01471.pdf"""
+    return 1.0 - jaccard_coe(output, target, axis=axis, smooth=smooth)
+
+
+def iou_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
+    """ Wrapper to Soft Jaccard (also known as Intersection over Union) loss.
+    Refs. https://arxiv.org/pdf/1608.01471.pdf
     """
-    define weighted cross-entropy function for classification tasks.
-    1. In binary classification, each output channel corresponds to a binary (soft) decision. Therefore, the
-    weighting needs to happen within the computation of the loss --> 'weighted_cross_entropy_with_logits'.
-    2. In mutually exclusive multilabel classification each output channel corresponds to the score of a class
-    candidate. The decision comes after and then --> 'softmax_cross_entropy_with_logits'
+    return 1.0 - jaccard_coe(output, target, axis=axis, smooth=smooth, _name='iou_coe')
+
+
+def weighted_softmax_cross_entropy(y_pred, y_true, num_classes, eps=1e-12):
     """
-    epsilon = tf.constant(1e-12, dtype=logits.dtype)
+    Define weighted cross-entropy function for classification tasks.
+    :param y_pred: tensor [None, width, height, n_classes]
+    :param y_true: tensor [None, width, height, n_classes]
+    :param eps: (float) small value to avoid division by zero
+    :param num_classes: (int) number of classes
+    :return:
+    """
 
-    # specify class weights:
-    class_weights = tf.divide(1., tf.reduce_sum(tf.cast(labels, tf.float32), axis=0) + epsilon)
+    n = [tf.reduce_sum(tf.cast(y_true[..., c], tf.float32)) for c in range(num_classes)]
+    n_tot = tf.reduce_sum(n)
 
-    # assign a weight for each sample inside the current minibatch
-    weights = tf.reduce_sum(tf.multiply(tf.cast(labels, tf.float32), class_weights), 1)
+    weights = [n_tot / (n[c] + eps) for c in range(num_classes)]
 
-    epsilon = tf.constant(1e-12, dtype=logits.dtype)
-    print("Loss function: 'weighted cross_entropy', weights evaluated on minibatch samples")
+    y_pred = tf.reshape(y_pred, (-1, num_classes))
+    y_true = tf.to_float(tf.reshape(y_true, (-1, num_classes)))
+    softmax = tf.nn.softmax(y_pred)
 
-    num_classes = labels.get_shape().as_list()[-1]  # classes are on the last index
-
-    y_pred = tf.reshape(logits, (-1, num_classes))
-    y_true = tf.to_float(tf.reshape(labels, (-1, num_classes)))
-    softmax = tf.nn.softmax(y_pred) + epsilon
-
-    cross_entropy = -tf.reduce_sum(tf.multiply(y_true, tf.log(softmax)), reduction_indices=[1])
-    w_cross_entropy = tf.multiply(cross_entropy, weights)
-
-    return tf.reduce_mean(w_cross_entropy, name='weighted_cross_entropy')
+    w_cross_entropy = -tf.reduce_sum(tf.multiply(y_true * tf.log(softmax + eps), weights), reduction_indices=[1])
+    loss = tf.reduce_mean(w_cross_entropy, name='weighted_softmax_cross_entropy')
+    return loss
 
 
 def segmentation_weighted_cross_entropy(y_pred, y_true, n_voxels, epsilon=1e-12):
@@ -107,30 +123,3 @@ def gradient_loss(y_true, y_pred):
 
     gradient_loss = tf.reduce_mean(tf.squared_difference(x_reconstructed_grad, x_true_grad), 1)
     return gradient_loss
-
-
-def hinge_loss(y_pred, y_true):
-    """ Hinge Loss.
-    Arguments:
-        y_pred: `Tensor` of `float` type. Predicted values.
-        y_true: `Tensor` of `float` type. Targets (labels).
-    """
-    with tf.name_scope("HingeLoss"):
-        return tf.reduce_mean(tf.maximum(1. - y_true * y_pred, 0.))
-
-
-def contrastive_loss(y_pred, y_true, margin = 1.0):
-    """ Contrastive Loss.
-    
-        Computes the constrative loss between y_pred (logits) and y_true (labels).
-        http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf
-        Arguments:
-            y_pred: `Tensor`. Predicted values.
-            y_true: `Tensor`. Targets (labels).
-            margin: . A self-set parameters that indicate the distance between the expected different identity features. Defaults 1.
-    """
-
-    with tf.name_scope("ContrastiveLoss"):
-        dis1 = y_true * tf.square(y_pred)
-        dis2 = (1 - y_true) * tf.square(tf.maximum((margin - y_pred), 0))
-        return tf.reduce_sum(dis1 +dis2) / 2.

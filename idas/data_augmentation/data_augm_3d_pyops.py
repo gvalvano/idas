@@ -32,7 +32,8 @@ import numpy as np
 
 def _random_linear_bias(x_batch, cval):
     """
-    Add data augmentation to the samples. Add linear bias in a random direction with values in range cval
+    Add data augmentation to the samples. Add linear bias in a random direction with values in range cval.
+    Assuming image in grayscale.
     :param x_batch: input samples
     :param cval: values used to scale image values along a random direction.
     :return: transformed data
@@ -42,7 +43,7 @@ def _random_linear_bias(x_batch, cval):
     mesh_2d = np.repeat(x[:, np.newaxis], x_batch[0].shape[1], axis=1)
     mesh = np.repeat(mesh_2d[:, :, np.newaxis], x_batch[0].shape[2], axis=2)
     for i in range(n_samples):
-        # TODO: immagine assunta in scala di grigi
+        # assuming image in grayscale
         angle = np.random.uniform(0, 360)
         rotated_mesh = scipy.ndimage.interpolation.rotate(mesh, angle, reshape=False, mode='nearest')
         x_batch[i] *= rotated_mesh.reshape(x_batch[i].shape)

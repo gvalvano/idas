@@ -1,3 +1,6 @@
+from tensorflow.python.client import device_lib
+import time
+import sys
 import os
 
 
@@ -38,3 +41,17 @@ def print_yellow_text(text, sep=True):
     if sep:
         print('_' * 40)  # line separator
     print('\033[1;33m{0}\033[0m'.format(text))
+
+
+class bcolors:
+    """ Colors for formatted text.
+    Example: print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
+    """
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'

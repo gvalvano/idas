@@ -32,7 +32,7 @@ def iou_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
 
 def weighted_softmax_cross_entropy(y_pred, y_true, num_classes, eps=1e-12):
     """
-    Define weighted cross-entropy function for classification tasks.
+    Define weighted cross-entropy function for classification tasks. Applies softmax on y_red.
     :param y_pred: tensor [None, width, height, n_classes]
     :param y_true: tensor [None, width, height, n_classes]
     :param eps: (float) small value to avoid division by zero
@@ -51,6 +51,29 @@ def weighted_softmax_cross_entropy(y_pred, y_true, num_classes, eps=1e-12):
 
     w_cross_entropy = -tf.reduce_sum(tf.multiply(y_true * tf.log(softmax + eps), weights), reduction_indices=[1])
     loss = tf.reduce_mean(w_cross_entropy, name='weighted_softmax_cross_entropy')
+    return loss
+
+
+def weighted_cross_entropy(y_pred, y_true, num_classes, eps=1e-12):
+    """
+    Define weighted cross-entropy function for classification tasks. Assuming y_pred already probabilistic.
+    :param y_pred: tensor [None, width, height, n_classes]
+    :param y_true: tensor [None, width, height, n_classes]
+    :param eps: (float) small value to avoid division by zero
+    :param num_classes: (int) number of classes
+    :return:
+    """
+
+    n = [tf.reduce_sum(tf.cast(y_true[..., c], tf.float32)) for c in range(num_classes)]
+    n_tot = tf.reduce_sum(n)
+
+    weights = [n_tot / (n[c] + eps) for c in range(num_classes)]
+
+    y_pred = tf.reshape(y_pred, (-1, num_classes))
+    y_true = tf.to_float(tf.reshape(y_true, (-1, num_classes)))
+
+    w_cross_entropy = -tf.reduce_sum(tf.multiply(y_true * tf.log(y_pred + eps), weights), reduction_indices=[1])
+    loss = tf.reduce_mean(w_cross_entropy, name='weighted_cross_entropy')
     return loss
 
 

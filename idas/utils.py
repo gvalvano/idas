@@ -88,53 +88,64 @@ class ProgressBar(object):
 
         """
         self.update_delay = update_delay
-        self.old_time = None
         self.lta = None  # last time of arrival (for ETA monitoring)
-        self.n_steps = 0  # number of progress bar steps
+
+        # internal variables:
+        self._old_time = None
+        self._n_steps = 0  # number of progress bar steps
+        self._last_suffix_len = 0
 
     def attach(self):
         # setup progress bar
         prefix = "  \033[31mProgress\033[0m:    "
         suffix = "" if self.lta is None else " ETA {0:.3f} s ".format(self.lta)
+        self._last_suffix_len = len(suffix)
         sys.stdout.write(prefix + "[=> " + suffix)
         sys.stdout.flush()
-        self.old_time = time.time()
+        self._old_time = time.time()
 
     def monitor_progress(self):
-        if self.old_time is None:
+        if self._old_time is None:
             self.WrongInitializationError.report()
             raise self.WrongInitializationError
 
-        if time.time() - self.old_time > self.update_delay:
+        if time.time() - self._old_time > self.update_delay:
             # update the progress bar every 'self.update_delay' seconds
             if self.lta is None:
                 n_back = 2
                 suffix = ""
             else:
-                eta = self.lta - (self.update_delay * self.n_steps)
-                n_back = 2 + len(" ETA {0:.3f} s ".format(eta))
+                self._n_steps += 1
+                eta = self.lta - (self.update_delay * self._n_steps)
+                n_back = 2 + self._last_suffix_len
                 suffix = " ETA {0:.3f} s ".format(eta)
+                self._last_suffix_len = len(suffix)
+
             sys.stdout.write("\b" * n_back + "=> " + suffix)
             sys.stdout.flush()
-            self.old_time = time.time()
-            self.n_steps += 1
+            self._old_time = time.time()
 
     def update_lta(self, lta):
         """ Update LTA with the value of the last time of arrival. """
         self.lta = lta
 
     def detach(self):
-        if self.old_time is None:
+        """ This ends the progress bar. """
+
+        if self._old_time is None:
             self.WrongInitializationError.report()
             raise self.WrongInitializationError
 
-        n_back = 2 if self.lta is None \
-            else 2 + len(" ETA {0:.3f} s ".format(self.lta - (self.update_delay * self.n_steps)))
+        if self.lta is None:
+            n_back = 2
+            sys.stdout.write("\b" * n_back + "=]{0}\n".format(" " * 50))  # this ends the progress bar
+        else:
+            n_back = 2 + self._last_suffix_len
+            sys.stdout.write("\b" * n_back + "=]{0}\n".format(" " * self._last_suffix_len))
 
-        sys.stdout.write("\b" * n_back + "=]\n")  # this ends the progress bar
-
-        # reset variable:
-        self.n_steps = 0
+            # reset internal variables:
+        self._n_steps = 0
+        self._last_suffix_len = 0
 
     class WrongInitializationError(Exception):
         """ Raised if the progress bar is not correctly initialized """

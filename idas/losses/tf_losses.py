@@ -1,5 +1,5 @@
 import tensorflow as tf
-from idas.metrics.tf_metrics import dice_coe, jaccard_coe
+from idas.metrics.tf_metrics import dice_coe, jaccard_coe, generalized_dice_coe, shannon_binary_entropy
 
 
 def l2_weights_regularization_loss(exclude_bias=False):
@@ -15,6 +15,11 @@ def l2_weights_regularization_loss(exclude_bias=False):
 def dice_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
     """ Returns Soft Sørensen–Dice loss """
     return 1.0 - dice_coe(output, target, axis=axis, smooth=smooth)
+
+
+def generalized_dice_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
+    """ Returns the Generalized Soft Sørensen–Dice loss """
+    return 1.0 - generalized_dice_coe(output, target, axis=axis, smooth=smooth)
 
 
 def jaccard_loss(output, target, axis=(1, 2, 3), smooth=1e-12):

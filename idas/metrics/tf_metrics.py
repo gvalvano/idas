@@ -153,7 +153,8 @@ def shannon_binary_entropy(incoming, axis=(1, 2), unscaled=False, smooth=1e-12):
     assert incoming.dtype in [tf.float32, tf.float64]
 
     # compute probability of label l
-    p_l = tf.reduce_sum(incoming, axis=axis) + smooth
+    p_l = tf.reduce_sum(incoming, axis=axis)
+    p_l = tf.clip_by_value(p_l, clip_value_min=smooth, clip_value_max=1-smooth)
     entropy_l = - p_l * tf.log(p_l) - (1 - p_l) * tf.log(1 - p_l)
 
     if not unscaled:

@@ -88,3 +88,36 @@ def jaccard_coe(output, target, axis=(1, 2, 3), smooth=1e-12, _name='jaccard_coe
 def iou_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
     """Wrapper to Jaccard (also known as Intersection over Union) coefficient """
     return jaccard_coe(output, target, axis, smooth, _name='iou_coe')
+
+
+def shannon_binary_entropy(incoming, axis=(1, 2), unscaled=False, smooth=1e-12):
+    """
+    Evaluates shannon entropy on a binary mask. The last index contains one-hot encoded predictions.
+    :param incoming: incoming tensor (one-hot encoded). On the first dimension there is the number of samples (typically
+                the batch size)
+    :param axis: axis containing the input dimension. Assuming 'incoming' to be a 4D tensor, axis has length 2: width
+                and height; if 'incoming' is a 5D tensor, axis should have length of 3, and so on.
+    :param unscaled: The computation does the operations using the natural logarithm log(). To obtain the actual entropy
+                value one must scale this value by log(2) since the entropy should be computed in base 2 (hence log2()).
+                However, one may desire using this function in a loss function to train a neural net. Then, the log(2)
+                is just a multiplicative constant of the gradient and could be omitted for efficiency reasons. Turning
+                this flag to True allows for this behaviour to happen (default is False, then the actual entropy).
+    :param smooth: This small value will be added to the numerator and denominator.
+    :return:
+    """
+
+    assert incoming.dtype in [tf.float32, tf.float64]
+    assert tf.equal(tf.maximum(incoming), 1.0)
+    assert tf.equal(tf.minimum(incoming), 1.0)
+
+    # compute probability of label l
+    p_l = tf.reduce_sum(incoming, axis=axis) + smooth
+    entropy_l = - p_l * tf.log(p_l) - (1 - p_l) * tf.log(1 - p_l)
+
+    if not unscaled:
+        entropy_l = tf.log(2.0) * entropy_l
+
+    entropy = tf.reduce_sum(entropy_l, axis=-1)
+    mean_entropy = tf.reduce_mean(entropy, axis=0)
+
+    return mean_entropy

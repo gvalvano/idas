@@ -136,7 +136,7 @@ def iou_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
 
 def shannon_binary_entropy(incoming, axis=(1, 2), unscaled=False, smooth=1e-12):
     """
-    Evaluates shannon entropy on a binary mask. The last index contains one-hot encoded predictions.
+    Evaluates shannon entropy on a binary mask (data type float). The last index contains one-hot encoded predictions.
     :param incoming: incoming tensor (one-hot encoded). On the first dimension there is the number of samples (typically
                 the batch size)
     :param axis: axis containing the input dimension. Assuming 'incoming' to be a 4D tensor, axis has length 2: width
@@ -151,8 +151,6 @@ def shannon_binary_entropy(incoming, axis=(1, 2), unscaled=False, smooth=1e-12):
     """
 
     assert incoming.dtype in [tf.float32, tf.float64]
-    assert tf.equal(tf.maximum(incoming), 1.0)
-    assert tf.equal(tf.minimum(incoming), 1.0)
 
     # compute probability of label l
     p_l = tf.reduce_sum(incoming, axis=axis) + smooth

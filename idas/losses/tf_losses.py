@@ -146,3 +146,21 @@ def gradient_loss(y_true, y_pred):
 
     gradient_loss = tf.reduce_mean(tf.squared_difference(x_reconstructed_grad, x_true_grad), 1)
     return gradient_loss
+
+
+def shannon_binary_entropy_loss(incoming, axis=(1, 2), unscaled=True, smooth=1e-12):
+    """
+    Evaluates shannon entropy on a binary mask. The last index contains one-hot encoded predictions.
+    :param incoming: incoming tensor (one-hot encoded). On the first dimension there is the number of samples (typically
+                the batch size)
+    :param axis: axis containing the input dimension. Assuming 'incoming' to be a 4D tensor, axis has length 2: width
+                and height; if 'incoming' is a 5D tensor, axis should have length of 3, and so on.
+    :param unscaled: The computation does the operations using the natural logarithm log(). To obtain the actual entropy
+                value one must scale this value by log(2) since the entropy should be computed in base 2 (hence log2()).
+                However, one may desire using this function in a loss function to train a neural net. Then, the log(2)
+                is just a multiplicative constant of the gradient and could be omitted for efficiency reasons. Turning
+                this flag to False allows for exact actual entropy evaluation; default behaviour is True.
+    :param smooth: This small value will be added to the numerator and denominator.
+    :return:
+    """
+    return shannon_binary_entropy(incoming, axis=axis, unscaled=unscaled, smooth=smooth)

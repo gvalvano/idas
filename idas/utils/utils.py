@@ -1,6 +1,4 @@
 from tensorflow.python.client import device_lib
-import time
-import sys
 import os
 
 
@@ -43,7 +41,7 @@ def print_yellow_text(text, sep=True):
     print('\033[1;33m{0}\033[0m'.format(text))
 
 
-class bcolors:
+class BColors:
     """ Colors for formatted text.
     Example: print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
     """

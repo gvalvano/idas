@@ -37,7 +37,7 @@ def iou_loss(output, target, axis=(1, 2, 3), smooth=1e-12):
 
 def weighted_softmax_cross_entropy(y_pred, y_true, num_classes, eps=1e-12):
     """
-    Define weighted cross-entropy function for classification tasks. Applies softmax on y_red.
+    Define weighted cross-entropy function for classification tasks. Applies softmax on y_pred.
     :param y_pred: tensor [None, width, height, n_classes]
     :param y_true: tensor [None, width, height, n_classes]
     :param eps: (float) small value to avoid division by zero

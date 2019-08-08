@@ -8,7 +8,7 @@ b_init = tf.zeros_initializer()
 
 class UNet(object):
 
-    def __init__(self, incoming, n_out, is_training, n_filters=64, name='U-Net_2D'):
+    def __init__(self, incoming, n_out, is_training, n_filters=64, upsample='up2D', name='U-Net_2D'):
         """
         Class for UNet architecture. This is a 2D version (hence the vanilla UNet), which means it only employs
         bi-dimensional convolution and strides. This implementation also uses batch normalization after each conv layer.
@@ -19,6 +19,9 @@ class UNet(object):
                         needed for the behaviour of dropout, batch normalization, ecc. (which behave differently
                         at train and test time)
         :param n_filters: (int) numebr of filters in the first layer. Default=64 (as in the vanilla unet)
+        :param upsample: (string) upsample strategy. Defaults 'up2D' interpolates the features maps using nearest
+                        neighbour strategy (as in the vanilla unet). Using 'deconv' you can force the model to
+                        interpolate using the transposed convolution.
         :param name: (string) name scope for the unet
 
         - - - - - - - - - - - - - - - -
@@ -46,11 +49,13 @@ class UNet(object):
         shape = incoming.get_shape().as_list()
         assert not shape[1] % 16
         assert not shape[2] % 16
+        assert upsample in ['up2D', 'deconv']
 
         self.incoming = incoming
         self.n_out = n_out
         self.is_training = is_training
         self.nf = n_filters
+        self.upsample = upsample
         self.name = name
 
     def build(self):
@@ -88,10 +93,14 @@ class UNet(object):
         en_brick_0, concat_0, en_brick_1, concat_1, en_brick_2, concat_2, en_brick_3, concat_3, code = code
 
         with tf.variable_scope('Decoder'):
-            dec_brick_0 = self._decode_brick(code, concat_3, 8 * self.nf, self.is_training, scope='decode_brick_0')
-            dec_brick_1 = self._decode_brick(dec_brick_0, concat_2, 4 * self.nf, self.is_training, scope='decode_brick_1')
-            dec_brick_2 = self._decode_brick(dec_brick_1, concat_1, 2 * self.nf, self.is_training, scope='decode_brick_2')
-            dec_brick_3 = self._decode_brick(dec_brick_2, concat_0, self.nf, self.is_training, scope='decode_brick_3')
+            dec_brick_0 = self._decode_brick(code, concat_3, 8 * self.nf, self.is_training,
+                                             upsample=self.upsample, scope='decode_brick_0')
+            dec_brick_1 = self._decode_brick(dec_brick_0, concat_2, 4 * self.nf, self.is_training,
+                                             upsample=self.upsample, scope='decode_brick_1')
+            dec_brick_2 = self._decode_brick(dec_brick_1, concat_1, 2 * self.nf, self.is_training,
+                                             upsample=self.upsample, scope='decode_brick_2')
+            dec_brick_3 = self._decode_brick(dec_brick_2, concat_0, self.nf, self.is_training,
+                                             upsample=self.upsample, scope='decode_brick_3')
 
         return dec_brick_3
 
@@ -122,12 +131,23 @@ class UNet(object):
         return pool, concat_layer_out
 
     @staticmethod
-    def _decode_brick(incoming, concat_layer_in, nb_filters, is_training, scope):
+    def _decode_brick(incoming, concat_layer_in, nb_filters, is_training, scope, upsample='up2D'):
         """ Decoding brick: deconv (up-pool) --> conv --> conv.
         """
         with tf.variable_scope(scope):
-            conv1t = layers.conv2d_transpose(incoming, filters=nb_filters, kernel_size=2, strides=2, padding='same',
-                                             kernel_initializer=he_init, bias_initializer=b_init)
+
+            if upsample == 'deconv':
+                conv1t = layers.conv2d_transpose(incoming, filters=nb_filters, kernel_size=2, strides=2, padding='same',
+                                                 kernel_initializer=he_init, bias_initializer=b_init)
+            elif upsample == 'up2D':
+                _, old_height, old_width, __ = incoming.get_shape()
+                new_height, new_width = 2.0 * old_height, 2.0 * old_width
+                upsampled = tf.image.resize_nearest_neighbor(incoming, size=[new_height, new_width])
+                conv1t = layers.conv2d(upsampled, filters=nb_filters, kernel_size=3, strides=1, padding='same',
+                                       kernel_initializer=he_init, bias_initializer=b_init)
+            else:
+                raise ValueError
+            
             conv1t_bn = layers.batch_normalization(conv1t, training=is_training)
             conv1t_act = tf.nn.relu(conv1t_bn)
 

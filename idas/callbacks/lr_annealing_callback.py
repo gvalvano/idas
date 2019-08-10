@@ -73,6 +73,40 @@ def apply_1overt_decay(params, t):
     return a0 * 1. / (1 + k*t)
 
 
+def check_for_annealed_lr(cnn, sess, history_logs):
+    """
+    Checks if the flag for learning rate annealing (eventually performed in the past) exists and is True.
+    Returns True if it is the case, False otherwise.
+
+    Args:
+        cnn (tensor): neural network
+        sess (tf.Session): TensorFlow Session object
+        history_logs (str): file with the history
+
+    Returns:
+
+    """
+    has_been_run = False
+    try:
+        node = jlogger.read_one_node('LR_ANNEALING', file_name=history_logs)
+        if node['done_before']:
+            strategy = node['strategy']
+            last_lr = node['last_learning_rate']
+
+            print(" | This network was already trained with a strategy of \033[94m{0}\033[0m and the "
+                  "last learning rate was \033[94m{1}\033[0m".format(strategy, last_lr))
+            print(" | The learning rate will be consequently set to \033[94m{0}\033[0m".format(last_lr))
+            print(' | - - ')
+
+            sess.run(cnn.lr.assign(last_lr))
+
+            has_been_run = True
+
+    except (FileNotFoundError, KeyError):
+        pass
+    return has_been_run
+
+
 class LrAnnealingCallback(Callback):
     def __init__(self):
         super().__init__()

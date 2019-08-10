@@ -41,6 +41,42 @@ def run_sparse_step(sess, sparsity=0.30):
         sess.run(tf.assign(layer, tf.multiply(layer, tf.to_float(tf.abs(layer) >= _lambda))))
 
 
+def check_for_sparse_training(cnn, history_logs):
+    """
+    Checks if the flag for DSD training (that could have been added by a DSDCallback()) exists and it is True.
+    Returns True if it is the case, False otherwise.
+
+    Args:
+        cnn (tensor): neural network
+        history_logs (str): file with the history
+
+    Returns:
+        Returns has_been_run=True if the try succeeds, False otherwise.
+    """
+    has_been_run = False
+    try:
+        node = jlogger.read_one_node('SPARSE_TRAINING', file_name=history_logs)
+        if node['done_before']:
+            sparsity = node['sparsity']
+            beta = node['beta']
+
+            if not cnn.perform_sparse_training:
+                # otherwise the learning rate has already been reduced by dsd_callback
+                print(" | This network was already trained with Sparsity constraint of \033[94m{0}%\033[0m and "
+                      "a reduced learning rate by a multiplying factor beta \033[94m{1}%\033[0m."
+                      .format(sparsity * 100, beta * 100))
+                print(" | The current learning rate ({0}) will be consequently reduced by the same factor: \033[94m"
+                      "corrected learning rate = {1}\033[0m".format(cnn.lr, beta * cnn.lr))
+                print(' | - - ')
+                cnn.lr = beta * cnn.lr
+
+            has_been_run = True
+
+    except (FileNotFoundError, KeyError):
+        pass
+    return has_been_run
+
+
 class DSDCallback(Callback):
     def __init__(self):
         super().__init__()

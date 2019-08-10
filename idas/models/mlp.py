@@ -24,12 +24,14 @@ class MLP(object):
 
     def __init__(self, incoming, n_in, n_hidden, n_out, is_training, name='MLP'):
         """
-        Class for 3-layered multilayer perceptron (MLP).
-        :param incoming: (tensor) incoming tensor
-        :param n_in: (int) number of input units
-        :param n_hidden: (int) number of hidden units
-        :param n_out: (int) number of output units
-        :param is_training: (tf.placeholder(dtype=tf.bool) or bool) variable to define training or test mode; it is
+        Class for 3-layered MultiLayer Perceptron (MLP). It uses Batch Normalization by default.
+
+        Args:
+            incoming (tensor): incoming tensor
+            n_in (int): number of input units
+            n_hidden (int): number of hidden units
+            n_out (int): number of output units
+            is_training (tf.placeholder(dtype=tf.bool) or bool): variable to define training or test mode; it is
                         needed for the behaviour of dropout (which behaves differently at train and test time)
             name (string): variable scope (optional)
 

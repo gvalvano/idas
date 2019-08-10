@@ -17,12 +17,21 @@ import tensorflow as tf
 
 def film_layer(incoming, gamma, beta, name='film'):
     """
-    FiLM layer
-    :param incoming: incoming tensor
-    :param gamma: incoming gamma
-    :param beta: incoming beta
-    :param name: (string) name scope
-    :return:
+    FiLM layer. For details refer to [1].
+
+    Args:
+        incoming (tensor): input tensor
+        gamma (tensor): gamma factor (typically predicted by another network)
+        beta (tensor): beta factor (typically predicted by another network)
+        name (string): variable scope (optional)
+
+    Returns:
+        A Tensor which is the output of the layer.
+
+    References:
+        [1] Perez, E., Strub, F., de Vries, H., Dumoulin, V., Courville, A.C., 2018. FiLM: Visual reasoning with
+        a general conditioning layer, in: AAAI, AAAI Press. pp. 3942–3951.
+
     """
     with tf.name_scope(name):
         # get shape of incoming tensors:

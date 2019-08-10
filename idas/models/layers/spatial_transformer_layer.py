@@ -1,7 +1,8 @@
-"""
-Source: https://github.com/daviddao/spatial-transformer-tensorflow
-"""
-
+# Adapted from:
+#      https://github.com/daviddao/spatial-transformer-tensorflow
+#
+# with the following copyright.
+#
 # Copyright 2016 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,45 +17,35 @@ Source: https://github.com/daviddao/spatial-transformer-tensorflow
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
+
 import tensorflow as tf
 
 
-def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
-    """Spatial Transformer Layer
+def transformer(U, theta, out_size, name='SpatialTransformer'):
+    """
+    Spatial Transformer Layer.
+    Implements a spatial transformer layer as described in [1]. Based on [2] and edited by David Dao for TensorFlow.
 
-    Implements a spatial transformer layer as described in [1]_.
-    Based on [2]_ and edited by David Dao for Tensorflow.
+    Args:
+        U (float): The output of a convolutional net; should have the shape [num_batch, height, width, num_channels].
+        theta (float): The output of the localisation network should be [num_batch, 6].
+        out_size (tuple of two ints): The size of the output of the network (height, width)
+        name (string): variable scope (optional)
 
-    Parameters
-    ----------
-    U : float
-        The output of a convolutional net should have the
-        shape [num_batch, height, width, num_channels].
-    theta: float
-        The output of the
-        localisation network should be [num_batch, 6].
-    out_size: tuple of two ints
-        The size of the output of the network (height, width)
+    Returns:
+        The transformed output.
 
-    References
-    ----------
-    .. [1]  Spatial Transformer Networks
-            Max Jaderberg, Karen Simonyan, Andrew Zisserman, Koray Kavukcuoglu
-            Submitted on 5 Jun 2015
-    .. [2]  https://github.com/skaae/transformer_network/blob/master/transformerlayer.py
-
-    Notes
-    -----
-    To initialize the network to the identity transform init
-    ``theta`` to :
-        identity = np.array([[1., 0., 0.],
-                             [0., 1., 0.]])
-        identity = identity.flatten()
-        theta = tf.Variable(initial_value=identity)
+    Notes:
+        To initialize the network to the identity transform init ``theta`` to :
+            identity = np.array([[1., 0., 0.],
+                                 [0., 1., 0.]])
+            identity = identity.flatten()
+            theta = tf.Variable(initial_value=identity)
 
     """
 
     def _repeat(x, n_repeats):
+
         with tf.variable_scope('_repeat'):
             rep = tf.transpose(
                 tf.expand_dims(tf.ones(shape=tf.stack([n_repeats, ])), 1), [1, 0])
@@ -63,6 +54,7 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             return tf.reshape(x, [-1])
 
     def _interpolate(im, x, y, out_size):
+
         with tf.variable_scope('_interpolate'):
             # constants
             num_batch = tf.shape(im)[0]
@@ -81,8 +73,8 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             max_x = tf.cast(tf.shape(im)[2] - 1, 'int32')
 
             # scale indices from [-1, 1] to [0, width/height]
-            x = (x + 1.0)*(width_f) / 2.0
-            y = (y + 1.0)*(height_f) / 2.0
+            x = (x + 1.0) * width_f / 2.0
+            y = (y + 1.0) * height_f / 2.0
 
             # do sampling
             x0 = tf.cast(tf.floor(x), 'int32')
@@ -122,16 +114,13 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
             wb = tf.expand_dims(((x1_f-x) * (y-y0_f)), 1)
             wc = tf.expand_dims(((x-x0_f) * (y1_f-y)), 1)
             wd = tf.expand_dims(((x-x0_f) * (y-y0_f)), 1)
+
             output = tf.add_n([wa*Ia, wb*Ib, wc*Ic, wd*Id])
             return output
 
     def _meshgrid(height, width):
+
         with tf.variable_scope('_meshgrid'):
-            # This should be equivalent to:
-            #  x_t, y_t = np.meshgrid(np.linspace(-1, 1, width),
-            #                         np.linspace(-1, 1, height))
-            #  ones = np.ones(np.prod(x_t.shape))
-            #  grid = np.vstack([x_t.flatten(), y_t.flatten(), ones])
             x_t = tf.matmul(tf.ones(shape=tf.stack([height, 1])),
                             tf.transpose(tf.expand_dims(tf.linspace(-1.0, 1.0, width), 1), [1, 0]))
             y_t = tf.matmul(tf.expand_dims(tf.linspace(-1.0, 1.0, height), 1),
@@ -142,9 +131,11 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
 
             ones = tf.ones_like(x_t_flat)
             grid = tf.concat([x_t_flat, y_t_flat, ones], 0)
+
             return grid
 
     def _transform(theta, input_dim, out_size):
+
         with tf.variable_scope('_transform'):
             num_batch = tf.shape(input_dim)[0]
             height = tf.shape(input_dim)[1]
@@ -185,23 +176,21 @@ def transformer(U, theta, out_size, name='SpatialTransformer', **kwargs):
 
 
 def batch_transformer(U, thetas, out_size, name='BatchSpatialTransformer'):
-    """Batch Spatial Transformer Layer
+    """
+    Batch Spatial Transformer Layer
 
-    Parameters
-    ----------
+    Args:
+        U (float): The output of a convolutional net; should have the shape [num_batch, height, width, num_channels].
+        thetas (): The output of the localisation network should be [num_batch, 6].
+        out_size (tuple of two ints): The size of the output of the network (height, width)
+        name (string): variable scope (optional)
 
-    U : float
-        tensor of inputs [num_batch,height,width,num_channels]
-    thetas : float
-        a set of transformations for each input [num_batch,num_transforms,6]
-    out_size : int
-        the size of the output [out_height,out_width]
-
-    Returns: float
+    Returns:
         Tensor of size [num_batch*num_transforms,out_height,out_width,num_channels]
+
     """
     with tf.variable_scope(name):
         num_batch, num_transforms = map(int, thetas.get_shape().as_list()[:2])
-        indices = [[i]*num_transforms for i in xrange(num_batch)]
+        indices = [[i]*num_transforms for i in range(num_batch)]
         input_repeated = tf.gather(U, tf.reshape(indices, [-1]))
         return transformer(input_repeated, thetas, out_size)

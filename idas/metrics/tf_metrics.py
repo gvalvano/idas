@@ -16,29 +16,22 @@ import tensorflow as tf
 
 
 def dice_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
-    """Soft Sørensen–Dice coefficient for comparing the similarity
-    of two batch of data, usually be used for binary image segmentation
-    i.e. labels are binary. The coefficient between 0 to 1, 1 means totally match.
+    """
+    Soft Sørensen–Dice coefficient (also known as just DICE coefficient) for evaluating the similarity of two batch of
+    data. The coefficient can vary between 0 and 1, where 1 means totally match. It is usually used for binary image
+    segmentation (e.g. using the loss function: 1 - dice_coe(...)).
 
-    Parameters
-    -----------
-    output : Tensor
-        A distribution with shape: [batch_size, ....], (any dimensions).
-    target : Tensor
-        The target distribution, format the same with `output`.
-    axis : tuple of int
-        All dimensions are reduced, default ``[1,2,3]``.
-    smooth : float
-        This small value will be added to the numerator and denominator.
+    Args:
+        output (Tensor): a distribution with shape: [batch_size, ....], (any dimensions). This is the prediction.
+        target (Tensor): the target distribution, format the same with `output`.
+        axis (tuple of int): contains all the dimensions to be reduced, default ``[1,2,3]``.
+        smooth (float): small value added to the numerator and denominator.
 
-    Examples
-    ---------
-    '>>> outputs = tl.act.pixel_wise_softmax(network.outputs)'
-    '>>> dice_loss = 1 - dice_coe(outputs, y_)'
+    Returns:
+        Dice coefficient.
 
-    References
-    -----------
-    - `Wiki-Dice <https://en.wikipedia.org/wiki/Sørensen–Dice_coefficient>`__
+    References:
+        `Wiki-Dice <https://en.wikipedia.org/wiki/Sørensen–Dice_coefficient>`__
 
     """
 
@@ -56,27 +49,27 @@ def dice_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
 
 
 def generalized_dice_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
-    """Generalized Soft Sørensen–Dice coefficient for comparing the similarity
-    of two batch of data, usually be used for binary image segmentation
-    i.e. labels are binary. The coefficient between 0 to 1, 1 means totally match.
-    This generalization of the Dice score weights each class over the number of pixels inside.
+    """Generalized Soft Sørensen–Dice coefficient for evaluating the similarity of two batch of data. The coefficient
+    can vary between 0 and 1, where 1 means totally match. It is usually used for binary image segmentation (e.g. using
+    the loss function: 1 - dice_coe(...)).
 
-    Parameters
-    -----------
-    output : Tensor
-        A distribution with shape: [batch_size, ....], (any dimensions).
-    target : Tensor
-        The target distribution, format the same with `output`.
-    axis : tuple of int
-        All dimensions are reduced, default ``[1,2,3]`` for compatibility with dice_coe(). The actual reduction is on
-        all dimensions but the last one.
-    smooth : float
-        This small value will be added to the numerator and denominator.
+    Args:
+        output (Tensor): a distribution with shape: [batch_size, ....], (any dimensions). This is the prediction.
+        target (Tensor): the target distribution, format the same with `output`.
+        axis (tuple of int): contains all the dimensions to be reduced, default ``[1,2,3]``.
+        smooth (float): small value added to the numerator and denominator.
 
-    Examples
-    ---------
-    '>>> outputs = tl.act.pixel_wise_softmax(network.outputs)'
-    '>>> dice_loss = 1 - generalized_dice_coe(outputs, y_)'
+    Returns:
+        Generalized Dice coefficient.
+
+    Examples:
+        outputs = softmax(network.outputs)
+        dice_loss = 1.0 - generalized_dice_coe(outputs, targets)
+
+    References:
+        [1] Sudre, Carole H., et al. "Generalised dice overlap as a deep learning loss function for highly unbalanced
+        segmentations." Deep learning in medical image analysis and multimodal learning for clinical decision support.
+        Springer, Cham, 2017. 240-248.
 
     """
 
@@ -100,32 +93,25 @@ def generalized_dice_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
 
 
 def jaccard_coe(output, target, axis=(1, 2, 3), smooth=1e-12, _name='jaccard_coe'):
-    """Soft Jaccard (also known as Intersection over Union) coefficient for comparing the similarity
-    of two batch of data, usually be used for binary image segmentation
-    i.e. labels are binary. The coefficient between 0 to 1, 1 means totally match.
+    """ Soft Jaccard (also known as Intersection over Union) coefficient for evaluating the similarity of two batch of
+    data. The coefficient can vary between 0 and 1, where 1 means totally match. It is usually used for binary image
+    segmentation (e.g. using the loss function: 1 - dice_coe(...)).
 
-    Parameters
-    -----------
-    output : Tensor
-        A distribution with shape: [batch_size, ....], (any dimensions).
-    target : Tensor
-        The target distribution, format the same with `output`.
-    axis : tuple of int
-        All dimensions are reduced, default ``[1,2,3]``.
-    smooth : float
-        This small value will be added to the numerator and denominator.
+    Args:
+        output (Tensor): a distribution with shape: [batch_size, ....], (any dimensions). This is the prediction.
+        target (Tensor): the target distribution, format the same with `output`.
+        axis (tuple of int): contains all the dimensions to be reduced, default ``[1,2,3]``.
+        smooth (float): small value added to the numerator and denominator.
 
-    _name : str
-        Name scope for the output value (internal usage only)
+    Returns:
+        Jaccard coefficient.
 
-    Examples
-    ---------
-    '>>> outputs = tl.act.pixel_wise_softmax(network.outputs)'
-    '>>> jaccard_loss = 1 - jaccard_coe(outputs, y_)'
+    Examples:
+        outputs = softmax(network.outputs)
+        jaccard_loss = 1.0 - jaccard_coe(outputs, targets)
 
-    References
-    -----------
-    - `Wiki-Jaccard <https://en.wikipedia.org/wiki/Jaccard_index>`__
+    References:
+        `Wiki-Jaccard <https://en.wikipedia.org/wiki/Jaccard_index>`__
 
     """
 
@@ -144,24 +130,42 @@ def jaccard_coe(output, target, axis=(1, 2, 3), smooth=1e-12, _name='jaccard_coe
 
 
 def iou_coe(output, target, axis=(1, 2, 3), smooth=1e-12):
-    """Wrapper to Jaccard (also known as Intersection over Union) coefficient """
+    """
+    Wrapper to Jaccard (also known as Intersection over Union) coefficient
+
+    Args:
+        output (Tensor): a distribution with shape: [batch_size, ....], (any dimensions). This is the prediction.
+        target (Tensor): the target distribution, format the same with `output`.
+        axis (tuple of int): contains all the dimensions to be reduced, default ``[1,2,3]``.
+        smooth (float): small value added to the numerator and denominator.
+
+    Returns:
+        Jaccard coefficient.
+
+    """
     return jaccard_coe(output, target, axis, smooth, _name='iou_coe')
 
 
 def shannon_binary_entropy(incoming, axis=(1, 2), unscaled=False, smooth=1e-12):
     """
-    Evaluates shannon entropy on a binary mask (data type float). The last index contains one-hot encoded predictions.
-    :param incoming: incoming tensor (one-hot encoded). On the first dimension there is the number of samples (typically
-                the batch size)
-    :param axis: axis containing the input dimension. Assuming 'incoming' to be a 4D tensor, axis has length 2: width
-                and height; if 'incoming' is a 5D tensor, axis should have length of 3, and so on.
-    :param unscaled: The computation does the operations using the natural logarithm log(). To obtain the actual entropy
-                value one must scale this value by log(2) since the entropy should be computed in base 2 (hence log2()).
-                However, one may desire using this function in a loss function to train a neural net. Then, the log(2)
-                is just a multiplicative constant of the gradient and could be omitted for efficiency reasons. Turning
-                this flag to True allows for this behaviour to happen (default is False, then the actual entropy).
-    :param smooth: This small value will be added to the numerator and denominator.
-    :return:
+    Evaluates shannon entropy loss on a binary mask. The last index of the incoming tensor must contain the one-hot
+    encoded predictions.
+
+    Args:
+        incoming (tensor): incoming tensor (one-hot encoded). On the first dimension there is the number of samples
+            (typically the batch size)
+        axis (tuple of int): axis containing the input dimension. Assuming 'incoming' to be a 4D tensor, axis has length
+            2: width and height; if 'incoming' is a 5D tensor, axis should have length of 3, and so on.
+        unscaled (Boolean): The computation does the operations using the natural logarithm log(). To obtain the actual
+            entropy alue one must scale this value by log(2) since the entropy should be computed in base 2 (hence
+            log2(.)). However, one may desire to use this function in a loss function to train a neural net. Then, the
+            log(2) is just a multiplicative constant of the gradient and could be omitted for efficiency reasons.
+            Turning this flag to True allows for this behaviour to happen (default is False, then the actual entropy).
+        smooth (float): small value added to the numerator and denominator.
+
+    Returns:
+        Entropy value of the incoming tensor.
+
     """
 
     assert incoming.dtype in [tf.float32, tf.float64]

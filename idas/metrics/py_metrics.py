@@ -17,25 +17,18 @@ import time
 from sklearn.metrics import confusion_matrix
 
 
-def eval_dice(seg, gt):
-    """
-    Returns Sørensen–Dice coefficient for binary masks (only 1 and 0).
-    Be aware that the mask must only contain 0 and 1, otherwise you can end up with wrong scores.
-    :param seg: segmentation mask
-    :param gt: ground truth mask
-    :return: dice score
-    """
-    dice = np.sum(seg[gt == 1])*2.0 / (np.sum(seg) + np.sum(gt))
-    return dice
-
-
 def true_false_positives_negatives(true, pred, normalize=False):
     """
     Returns true positive, false positives, false negatives and true positives.
-    :param true: true values
-    :param pred: predicted values
-    :param normalize: if True the function returns the rates, otherwise it returns the sums (int)
-    :return: tn, fp, fn, tp
+
+    Args:
+        true: true values
+        pred: predicted values
+        normalize (Boolean): if True, the function returns the rates. Otherwise it returns the sums (as an int)
+
+    Returns:
+        true negatives, false positives, false negatives, true positives
+
     """
     y_actual = np.array(true).reshape(-1)
     y_predict = np.array(pred).reshape(-1)
@@ -49,8 +42,14 @@ def true_false_positives_negatives(true, pred, normalize=False):
 def processing_time(test_function, *args):
     """
     Evaluates the time needed to execute the given function
-    :param test_function: function to execute
-    :return: processing time and outputs of the function
+
+    Args:
+        test_function (function): function to execute
+        *args:
+
+    Returns:
+        Processing time and outputs of the function
+
     """
     start_time = time.time()
     outputs = test_function(*args)

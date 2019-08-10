@@ -21,14 +21,34 @@ import numpy as np
 
 
 def get_nifti_matrix(filename, dtype=np.int16):
-    """ Returns array from nifti filename and affine matrix. """
+    """
+    Returns the array and the affine matrix contained in a nifti file.
+
+    Args:
+        filename (string): filename of the nifti file
+        dtype (type): dtype of the output array
+
+    Returns:
+        array and affine matrix
+
+    """
     array = nib.load(filename).get_data().astype(dtype)  # array
     affine = nib.load(filename).affine  # affine matrix
     return array, affine
 
 
 def save_nifti_matrix(array, affine, filename, dtype=np.int16):
-    """ Saves nifti array with a given affine matrix.
-    Notice that the nifti file will be saved in the given dtype (default int16)"""
+    """
+    Saves a nifti array with a given affine matrix with the given dtype (default numpy.int16)
+
+    Args:
+        array (np.array): array of data to be saved
+        affine (np.array): affine matrix
+        filename (string): filename of the nifti file
+        dtype (type): dtype of the output array
+
+    Returns:
+
+    """
     nimage = nib.Nifti1Image(array.astype(dtype), affine)
     nib.save(nimage, filename=filename)

@@ -21,6 +21,15 @@ import numpy as np
 
 
 def get_dicom_matrix(filename, dtype=np.float):
-    """ gets dicom matrix from a given filename. """
+    """
+    Get pixel array from desired dicom file.
+
+    Args:
+        filename (str): name of the dicom file.
+        dtype (type): type of the returned array
+
+    Returns:
+
+    """
     mdicom = dicom.read_file(filename)
     return mdicom.pixel_array.astype(dtype)

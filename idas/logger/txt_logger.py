@@ -19,7 +19,15 @@ logging.addLevelName(DEBUG_LEVEL_NUM, "logger")
 
 
 def parse_log_file(filename='log_file.txt'):
-    """ utility to read log file """
+    """
+    Utility to read log files.
+
+    Args:
+        filename (string): file name.
+
+    Returns:
+        The last line of the file split in half with separator sep
+    """
     # Example to read the last line of a file and split it in half with separator sep
     sep = '='
 
@@ -30,7 +38,16 @@ def parse_log_file(filename='log_file.txt'):
 
 
 def get_logger(log_file, lvl=DEBUG_LEVEL_NUM):
-    """ utility for logger definition, with level lvl """
+    """
+    Utility for logger definition, with level lvl
+
+    Args:
+        log_file (string): file name.
+        lvl (int): debug level number.
+
+    Returns:
+        Logger to write on the given log file with the given debug level number.
+    """
     formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
     handler = logging.FileHandler(log_file)

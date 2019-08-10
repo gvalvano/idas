@@ -19,7 +19,15 @@ Utilities for audio .wav data
 from scipy.io import wavfile
 
 
-def get_nifti_matrix(filename):
-    """ Returns sampling frequency and 1D array data from .wav filename. """
+def get_wav_freq_and_data(filename):
+    """
+    Returns 1D array data and sampling frequency from .wav filename.
+
+    Args:
+        filename (string): name of the file .wav
+
+    Returns:
+        data, sampling frequency
+    """
     freq, data = wavfile.read(filename)
     return data, freq

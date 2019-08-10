@@ -15,14 +15,25 @@ Utilities for hdf5 data
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# TODO: file to be completed
-
 import h5py
 import os
+import logging
 
 
 def create_hdf5_db(x_train, y_train, x_validation, y_validation, x_test, y_test, db_name='data.h5'):
-    """ Creates hdf5 database. """
+    """
+    Creates hdf5 database containing nodes for x_train, x_validation, x_test, y_train, y_validation, y_test.
+
+    Args:
+        x_train: Provide data to initialize the dataset.
+        y_train: Provide data to initialize the dataset.
+        x_validation: Provide data to initialize the dataset.
+        y_validation: Provide data to initialize the dataset.
+        x_test: Provide data to initialize the dataset.
+        y_test: Provide data to initialize the dataset.
+        db_name (str): Name of the dataset.
+
+    """
     print("Building database: " + db_name)
 
     # Create a hdf5 dataset
@@ -38,16 +49,33 @@ def create_hdf5_db(x_train, y_train, x_validation, y_validation, x_test, y_test,
 
 
 def get_data(db_name, key):
-    """ Returns what is behind key node on the HDF5 db named db_name. """
+    """
+    Returns what is behind key node on the HDF5 db named db_name.
+
+    Args:
+        db_name (str): Name of the dataset.
+        key (str): Name of the key in the dataset.
+
+    Returns:
+        The data under the given key.
+    """
     # Load hdf5 dataset
     hdf5 = h5py.File(db_name, 'r')
     data = hdf5[key]  # i.e. xt = h5f['x_train']
-    # TODO: note that the database remains open
+    logging.warning('Remember that the hdf5 dataset is still open.')
     return data
 
 
-def add_node(db_name, key, shape):
-    """ Add node with name key to hdf5 database. """
+def add_node(db_name, key, shape=None):
+    """
+    Adds node with name key to hdf5 database.
+
+    Args:
+        db_name (str): Name of the dataset.
+        key (str): Name of the key in the dataset.
+        shape (tuple of int): Dataset shape.  Use "()" for scalar datasets.  Required if "data" isn't provided.
+
+    """
     if not os.path.isfile(db_name):
         h5f = h5py.File(db_name, 'w')
     else:
@@ -59,13 +87,13 @@ def add_node(db_name, key, shape):
 
 def update_node(db_name, key):
     """ Change the content of a node. """
-    pass
+    raise NotImplementedError
 
 
 def add_elements_to_existing_node(db_name, key,):
     """  Add elements below the node. """
-    #h5f = h5py.File(db_name, 'r+')
-    #h5f[key].resize((curr_num_samples, dimPatches, dimPatches, n_channel))
-    #h5f[key][curr_num_samples - 1, :, :, :] = imgMatrix
-    #h5f.close()
-    pass
+    # h5f = h5py.File(db_name, 'r+')
+    # h5f[key].resize((curr_num_samples, dimPatches, dimPatches, n_channel))
+    # h5f[key][curr_num_samples - 1, :, :, :] = imgMatrix
+    # h5f.close()
+    raise NotImplementedError

@@ -18,51 +18,62 @@ import io
 data = {}
 
 
-def add_new_node(key, values, fname='log_file.json'):
+def add_new_node(key, values, file_name='log_file.json'):
     """
     Add new node to JSON file under the key=key and with sub-keys=values.
-    :param key: key to address the node
-    :param values: dictionary with key-values couples
-    :param fname: JSON file name to write
+
+    Args:
+        key (string): dictionary key to address the node
+        values (dict): dictionary with key-values couples
+        file_name (string): JSON file name to write
 
     Example:
         data.update({'SPARSE_TRAINING': {'done_before': False, 'beta': 0.10, 'sparsity': 0.30}})
+
     """
     data.update({key: values})
 
-    with io.open(fname, 'w', encoding='utf8') as outfile:
+    with io.open(file_name, 'w', encoding='utf8') as outfile:
         str_ = json.dumps(data,
                           indent=4, sort_keys=True,
                           separators=(',', ': '), ensure_ascii=False)
         outfile.write(str_)
 
 
-def read_one_node(key, fname='log_file.json'):
+def read_one_node(key, file_name='log_file.json'):
     """
     Return the dictionary in JSON file under the key=key.
-    :param key: dictionary key
-    :param fname: JSON file name to read
-    :return: dictionary
+
+    Args:
+        key (string): dictionary key to address the node
+        file_name (string): JSON file name to read
+
+    Returns:
+        Dictionary
+
     """
-    with open(fname, 'r', encoding='utf8') as infile:
+    with open(file_name, 'r', encoding='utf8') as infile:
         node = json.load(infile)
     return node[key]
 
 
-def update_node(key, sub_key, sub_value, fname='log_file.json'):
+def update_node(key, sub_key, sub_value, file_name='log_file.json'):
     """
     Update a node in a JSON file under the key=key and with sub-keys=values.
-    :param key: key to address the node
-    :param sub_key: field name to be updated under the node key
-    :param sub_value: value to assign to the field name under the node key
-    :param fname: JSON file name to write
+
+    Args:
+        key (string): dictionary key to address the node
+        sub_key (string): field name to be updated under the node key
+        sub_value (): value to assign to the field name under the node key
+        file_name (string): JSON file name to write
+
     """
-    content_dict = read_one_node(key, fname=fname)
+    content_dict = read_one_node(key, file_name=file_name)
     content_dict[sub_key] = sub_value
 
     data.update({key: content_dict})
 
-    with io.open(fname, 'w', encoding='utf8') as outfile:
+    with io.open(file_name, 'w', encoding='utf8') as outfile:
         str_ = json.dumps(data,
                           indent=4, sort_keys=True,
                           separators=(',', ': '), ensure_ascii=False)

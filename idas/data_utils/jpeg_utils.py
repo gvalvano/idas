@@ -21,13 +21,25 @@ import numpy as np
 
 
 def get_jpg_image(filename):
-    """ Loads JPEG image into 3D Numpy array of shape (width, height, channels)."""
+    """
+    Loads JPEG image into 3D Numpy array of shape (width, height, channels).
+
+    Args:
+        filename (str): file name
+    """
     with Image.open(filename) as image:
         im_arr = np.array(image)
     return im_arr
 
 
 def save_jpg_image(array, filename):
-    """ Saves JPEG image from array 3D Numpy array of shape (width, height, channels)."""
+    """
+    Saves JPEG image from array 3D Numpy array of shape (width, height, channels).
+
+    Args:
+        array (np.array): array to save
+        filename (str): file name
+
+    """
     img = Image.fromarray(array)
     img.save(filename)

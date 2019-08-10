@@ -19,6 +19,18 @@ Utilities for numpy data
 import numpy as np
 
 
-def get_numpy_matrix(path, shape, dtype=np.float32):
-    np.fromfile(path, dtype).reshape(shape)
+def get_numpy_matrix(filename, shape, dtype=np.float32):
+    """
+    Get numpy matrix from file.
+
+    Args:
+        filename (string): path to the numpy file.
+        shape (list of ints or tuple of ints): shape of the numpy array
+        dtype (type): dtype of the numpy array
+
+    Returns:
+        numpy array
+
+    """
+    return np.fromfile(filename, dtype).reshape(shape)
 

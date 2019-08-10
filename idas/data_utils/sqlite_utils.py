@@ -15,19 +15,21 @@ Utilities for sqlite database data
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# TODO: this is an incomplete code
-# written for the specific case of a 2 columns table (row_id, values)
-
 import sqlite3
 
 
 def create_db(db_name, table_name, column_names):
-    """ Create sqlite database with one table and two columns. 
-    :param db_name: name of the db
-    :param table_name: name of the table to create
-    :param column_names: list of names for the columns
-    :return: 
     """
+    Create sqlite database with one table and two columns.
+
+    Args:
+        db_name (string): name for the database
+        table_name (string): name of the table you want to create
+        column_names (list of 2 strings): list of names for the columns (2 columns)
+
+    """
+    assert len(column_names) == 2
+
     # db creation:
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
@@ -41,11 +43,14 @@ def create_db(db_name, table_name, column_names):
 
 
 def insert_values(db_name, table_name, values):
-    """ Inset a row of data in the database table 
-    :param db_name: name of the tb
-    :param table_name: name of the table to fill with values
-    :param values: values of the row (2 values)
-    :return: 
+    """
+    Inset a row of data in the database table
+
+    Args:
+        db_name (string): name of the database
+        table_name (string): name of the table
+        values: values of the row (2 values)
+
     """
 
     # db connection:

@@ -19,7 +19,13 @@ import pandas as pd
 
 
 def get_csv_data(filename, sep=','):
-    """ Loads CSV into Numpy array."""
+    """
+    Loads CSV into Numpy array.
+
+    Args:
+        filename (str): name of the CSV file.
+        sep (str): sep
+    """
     data_frame = pd.read_csv(filename, sep=sep)
     return data_frame
 

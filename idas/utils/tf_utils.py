@@ -17,29 +17,47 @@ import numpy as np
 
 
 def get_shape(tensor):
-    """ It returns the static shape of a tensor when available, otherwise returns its dynamic shape.
-        .Example
-          |  a.set_shape([32, 128])  # static shape of a is [32, 128]
-          |  a.set_shape([None, 128])  # first dimension of a is determined dynamicall
+    """
+    It returns the static shape of a tensor when available, otherwise returns its dynamic shape.
+
+    Args:
+        tensor (tensor): input tensor
+
+    Returns:
+        Static or dynamic shape.
+
+    Examples:
+        x.set_shape([32, 128])  # static shape of a is [32, 128]
+        x.set_shape([None, 128])  # first dimension of a is determined dynamical
+
     """
     static_shape = tensor.shape.as_list()
     dynamic_shape = tf.unstack(tf.shape(tensor))
-    dims = [s[1] if s[0] is None else s[0]
-            for s in zip(static_shape, dynamic_shape)]
+    dims = [shape[1] if shape[0] is None else shape[0] for shape in zip(static_shape, dynamic_shape)]
     return dims
 
 
 def reshape_tensor(tensor, dims_list):
-    """ General purpose reshape function to collapse any list of dimensions.
-        .Example
+    """
+    General purpose reshape function to collapse any list of dimensions.
+
+    Args:
+        tensor (tensor): input tensor
+        dims_list: list of dimension to collapse
+
+    RetuRns:
+        reshaped tensor
+
+    Examples:
         We want to convert a Tensor of rank 3 to a tensor of rank 2 by collapsing the second and third dimensions
         into one:
-          |  b = tf.placeholder(tf.float32, [None, 10, 32])
-          |  shape = get_shape(b)
-          |  b = tf.reshape(b, [shape[0], shape[1] * shape[2]])
+            b = tf.placeholder(tf.float32, [None, 10, 32])
+            shape = get_shape(b)
+            b = tf.reshape(b, [shape[0], shape[1] * shape[2]])
         With this function, we can easily write:
-          |  b = tf.placeholder(tf.float32, [None, 10, 32])
-          |  b = reshape(b, [0, [1, 2]])  # hence: collapse [1, 2] into the same dimension, leave 0 dimension unchanged
+            b = tf.placeholder(tf.float32, [None, 10, 32])
+            b = reshape(b, [0, [1, 2]])  # hence: collapse [1, 2] into the same dimension, leave 0 dimension unchanged
+
     """
     shape = get_shape(tensor)
     dims_prod = []

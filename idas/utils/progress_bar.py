@@ -17,8 +17,10 @@ import sys
 
 
 class BColors:
-    """ Colors for formatted text.
-    Example: print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
+    """
+    Colors for formatted text.
+    Examples:
+        print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
     """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -34,9 +36,12 @@ class ProgressBar(object):
     def __init__(self, update_delay):
         """
         Progress bar.
-        :param update_delay: (int) time to wait before updating the progress bar (in seconds).
 
-        ----------
+        Args:
+            update_delay (int): time to wait before updating the progress bar (in seconds).
+
+        Examples:
+
         Example 1:
 
             bar = ProgressBar(0.2)

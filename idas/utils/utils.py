@@ -17,17 +17,28 @@ import os
 
 
 def get_available_gpus():
+    """
+    Prints the available GPUs on the machine.
+    """
     local_device_protos = device_lib.list_local_devices()
     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
 
 def get_available_cpus():
+    """
+    Prints the available CPUs on the machine.
+    """
     local_device_protos = device_lib.list_local_devices()
     return [x.name for x in local_device_protos if x.device_type == 'CPU']
 
 
 def safe_mkdir(path):
-    """ Create a directory if there isn't one already. """
+    """
+    Create a directory if there isn't one already.
+
+    Args:
+        path (string): path to the directory to create.
+    """
     try:
         os.makedirs(path)
     except OSError:
@@ -35,8 +46,16 @@ def safe_mkdir(path):
 
 
 def create_gif(gif_name, path, ext='.png', delay=30, loop=0):
-    """ Create gif from the list of images under the given path
-    On Mac OS X, it requires "brew install ImageMagick".
+    """
+    Create gif from the list of images under the given path. On Mac OS X, it requires "brew install ImageMagick".
+
+    Args:
+        gif_name (string): name of the gif file.
+        path (string): path to the images. This is also the folder where the output gif will be saved
+        ext (str): extension of the images
+        delay (int): delay time
+        loop (int): loop parameter (defaults to 0, i.e. infinite loop)
+
     """
     if path[-1] == '/':
         path = path[:-1]
@@ -49,7 +68,14 @@ def create_gif(gif_name, path, ext='.png', delay=30, loop=0):
 
 
 def print_yellow_text(text, sep=True):
-    """ useful for debug """
+    """
+    Useful for debug. Prints yellow colored text.
+
+    Args:
+        text (string): text to print
+        sep (Boolean): if True, a separation line is printed before the text.
+
+    """
     if sep:
         print('_' * 40)  # line separator
     print('\033[1;33m{0}\033[0m'.format(text))
@@ -57,7 +83,8 @@ def print_yellow_text(text, sep=True):
 
 class BColors:
     """ Colors for formatted text.
-    Example: print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
+    Examples:
+        print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
     """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'

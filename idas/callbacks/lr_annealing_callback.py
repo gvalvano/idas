@@ -36,10 +36,14 @@ import tensorflow as tf
 
 def apply_step_decay(params, t):
     """
-    Reduces the learning rate by some factor every few epochs. 
-    :param params: parameters for the annealing
-    :param t: iteration number (or you can use number of epochs)
-    :return: updated learning rate
+    Reduces the learning rate by some factor every few epochs.
+
+    Args:
+        params: parameters for the annealing
+        t: iteration number (or you can use number of epochs)
+
+    Returns:
+        Updated learning rate
     """
     lr = params['curr_lr']  # current learning rate
     k = params['k']  # decay factor
@@ -52,9 +56,13 @@ def apply_step_decay(params, t):
 def apply_exp_decay(params, t):
     """
     Implements the mathematical form: a = a0 * exp(-k * t).
-    :param params: parameters for the annealing
-    :param t: iteration number (or you can use number of epochs)
-    :return: updated learning rate
+
+    Args:
+        params: parameters for the annealing
+        t: iteration number (or you can use number of epochs)
+
+    Returns:
+        Updated learning rate
     """
     a0 = params['lr0']  # initial learning rate
     k = params['k']  # decay factor
@@ -64,9 +72,13 @@ def apply_exp_decay(params, t):
 def apply_1overt_decay(params, t):
     """
     Implements the mathematical form: a = a0 / (1 + k*t). 
-    :param params: parameters for the annealing
-    :param t: iteration number (or you can use number of epochs)
-    :return: updated learning rate
+
+    Args:
+        params: parameters for the annealing
+        t: iteration number (or you can use number of epochs)
+
+    Returns:
+        Updated learning rate
     """
     a0 = params['lr0']  # initial learning rate
     k = params['k']  # decay factor
@@ -108,6 +120,8 @@ def check_for_annealed_lr(cnn, sess, history_logs):
 
 
 class LrAnnealingCallback(Callback):
+    """ Callback for learning rate annealing. """
+
     def __init__(self):
         super().__init__()
         # Define variables here because the callback __init__() is called before the initialization of all variables
@@ -124,14 +138,14 @@ class LrAnnealingCallback(Callback):
         self.history_log_file = kwargs['history_log_dir'] + os.sep + 'train_history.json'
 
         try:
-            _ = jlogger.read_one_node('LR_ANNEALING', fname=self.history_log_file)
+            _ = jlogger.read_one_node('LR_ANNEALING', file_name=self.history_log_file)
         except (FileNotFoundError, KeyError):
             vals = {'done_before': True,
                     'strategy': kwargs['annealing_strategy'],
                     'parameters': kwargs['annealing_parameters'],
                     'annealing_epoch_delay': kwargs['annealing_epoch_delay'],
                     'last_learning_rate': ast.literal_eval(kwargs['annealing_parameters'])['lr0']}
-            jlogger.add_new_node('LR_ANNEALING', vals, fname=self.history_log_file)
+            jlogger.add_new_node('LR_ANNEALING', vals, file_name=self.history_log_file)
 
         # define update operation:
         up_value = tf.placeholder(tf.float32, None, name='update_lr_value')
@@ -165,4 +179,4 @@ class LrAnnealingCallback(Callback):
                 kwargs['sess'].run(self.update_lr, feed_dict={'update_lr_value:0': updated_lr})
 
                 jlogger.update_node('LR_ANNEALING', sub_key='last_learning_rate', sub_value=updated_lr,
-                                    fname=self.history_log_file)
+                                    file_name=self.history_log_file)

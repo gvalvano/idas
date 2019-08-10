@@ -1,8 +1,6 @@
 """
 File with the definition of the callbacks.
 """
-
-
 #  Copyright 2019 Gabriele Valvano
 # 
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +14,7 @@ File with the definition of the callbacks.
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 
 class Callback(object):
     """ Callback base class. """

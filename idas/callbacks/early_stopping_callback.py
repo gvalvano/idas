@@ -31,12 +31,14 @@ class NeedForTestException(Exception):
 class EarlyStoppingCallback(Callback):
     def __init__(self, min_delta=0.01, patience=20):
         """
-         We want to define a minimum acceptable change (min_delta) in the loss function and a patience parameter
+        We want to define a minimum acceptable change (min_delta) in the loss function and a patience parameter
         which once exceeded triggers early stopping. When the loss increases or when it stops decreasing by more than
         min_delta, the patience counter activates. Once the patience counter expires, the callback returns a signal
         (stop = True).
-        :param min_delta: (float) minimum change required
-        :param patience: (int) number of iterations to wait before stopping training
+
+        Args:
+            min_delta (float): minimum change required
+            patience (int): number of iterations to wait before stopping training
         """
         super().__init__()
         # Define variables here because the callback __init__() is called before the initialization of all variables

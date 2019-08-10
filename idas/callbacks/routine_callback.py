@@ -22,6 +22,8 @@ import os
 
 
 class RoutineCallback(Callback):
+    """Routine callback: it is always called at the beginning of the training. """
+
     def __init__(self):
         super().__init__()
         self.history_log_file = None

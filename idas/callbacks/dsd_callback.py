@@ -22,12 +22,21 @@ import os
 
 
 def run_sparse_step(sess, sparsity=0.30):
-    """ 
-    Refer to Dense-Sparse-Dense training [Han et al. 2017].
-    Here weights < threshold _lambda are set to 0 accordingly to the desired sparsity (i.e. S=30%).
-    The _lambda value is chosen to leave the layer weight matrix with the desired sparsity.
     """
-    print("Thresholding elements below chosen value (Sparsity {0}%)".format(sparsity * 100))
+    Runs the sparse step for the Dense-Sparse-Dense training [1].
+    Here weights smaller than the threshold _lambda are set to 0 accordingly to the desired sparsity (i.e. S=30%).
+    The _lambda value is chosen to leave the layer weight matrix with the desired sparsity.
+
+    Args:
+        sess (tf.Session): TensorFlow session to run the sparse step
+        sparsity (float): sparsity percentage (default = 30%)
+
+    References:
+        [1] Han, Song, et al. "DSD: Dense-sparse-dense training for deep neural networks." arXiv preprint
+        arXiv:1607.04381 (2016).
+
+    """
+    print("Threshold elements below chosen value (Sparsity {0}%)".format(sparsity * 100))
     layers = [v.name for v in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES) if v.name.endswith('kernel:0')]
     for lyr in layers:
         layer = sess.graph.get_tensor_by_name(lyr)
@@ -78,6 +87,8 @@ def check_for_sparse_training(cnn, history_logs):
 
 
 class DSDCallback(Callback):
+    """ Callback for DSD training [Han et al., DSD: Dense-sparse-dense training for deep neural networks, 2016]. """
+
     def __init__(self):
         super().__init__()
         # Define variables here because the callback __init__() is called before the initialization of all variables
@@ -102,7 +113,7 @@ class DSDCallback(Callback):
         self.history_log_file = kwargs['history_log_dir'] + os.sep + 'train_history.json'
 
         vals = {'done_before': True, 'sparsity': sparsity, 'beta': beta}
-        jlogger.add_new_node('SPARSE_TRAINING', vals, fname=self.history_log_file)
+        jlogger.add_new_node('SPARSE_TRAINING', vals, file_name=self.history_log_file)
 
         # set learning rate to 1/10 (beta) of its initial value
         cnn.lr = beta * cnn.lr

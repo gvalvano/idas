@@ -22,7 +22,7 @@ b_init = tf.zeros_initializer()
 
 class MLP(object):
 
-    def __init__(self, incoming, n_in, n_hidden, n_out, is_training, k_prob=1.0, name='MLP'):
+    def __init__(self, incoming, n_in, n_hidden, n_out, is_training, name='MLP'):
         """
         Class for 3-layered multilayer perceptron (MLP).
         :param incoming: (tensor) incoming tensor
@@ -31,39 +31,50 @@ class MLP(object):
         :param n_out: (int) number of output units
         :param is_training: (tf.placeholder(dtype=tf.bool) or bool) variable to define training or test mode; it is
                         needed for the behaviour of dropout (which behaves differently at train and test time)
-        :param k_prob: (float) keep probability for dropout layer. Default = 1, i.e. no dropout applied. A common value
-                        for keep probability is 0.8 (e.g. 80% of active units at training time)
+            name (string): variable scope (optional)
+
+        Examples:
+
+            is_training = True
+            n_classes = 2
+
+            mlp = MLP(x, 128, 256, n_classes, is_training=training_mode)
+            mlp = MLP.build()
+            prediction = mlp.get_prediction()
+
         """
 
-        assert 0.0 <= k_prob <= 1.0
         self.incoming = incoming
         self.n_in = n_in
         self.n_hidden = n_hidden
         self.n_out = n_out
         self.is_training = is_training
-        self.k_prob = k_prob
         self.name = name
+        self.prediction = None
 
     def build(self):
         """
         Build the model.
         """
-        # keep_prob = tf.cond(tf.equal(self.is_training, tf.constant(True)), lambda: self.k_prob, lambda: 1.0)
-
         with tf.variable_scope(self.name):
             incoming = layers.flatten(self.incoming)
 
             input_layer = layers.dense(incoming, self.n_in, kernel_initializer=he_init, bias_initializer=b_init)
-            input_layer = tf.layers.batch_normalization(input_layer)
+            input_layer = tf.layers.batch_normalization(input_layer, training=self.is_training)
             input_layer = tf.nn.relu(input_layer)
 
             hidden_layer = layers.dense(input_layer, self.n_hidden, kernel_initializer=he_init, bias_initializer=b_init)
-            hidden_layer = tf.layers.batch_normalization(hidden_layer)
+            hidden_layer = tf.layers.batch_normalization(hidden_layer, training=self.is_training)
             hidden_layer = tf.nn.relu(hidden_layer)
 
             output_layer = layers.dense(hidden_layer, self.n_out, bias_initializer=b_init)
-            output_layer = tf.layers.batch_normalization(output_layer)
+            output_layer = tf.layers.batch_normalization(output_layer, training=self.is_training)
             output_layer = tf.nn.relu(output_layer)
 
             # final activation: linear
-        return output_layer
+            self.prediction = output_layer
+
+        return self
+
+    def get_prediction(self):
+        return self.get_prediction()

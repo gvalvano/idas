@@ -18,11 +18,16 @@ import numpy as np
 def np_zero_pad(array, size=None, reference=None, offset=None):
     """
     Zero-pads numpy array to the given size.
-    :param array: array to be padded
-    :param size: desired shape
-    :param reference: if size is None, then the desired size is evaluated as the shape of the reference array
-    :param offset: list of offsets (number of elements must be equal to the dimension of the array)
-    :return:
+    
+    Args:
+        array (np.array): array to be padded
+        size (tuple of ints, or list of ints): desired shape
+        reference (np.array): if size is None, then the desired size is evaluated as the shape of the reference array
+        offset (list, or tuple): list of offsets (number of elements must be equal to the dimension of the array) 
+
+    Returns:
+        The padded array.
+
     """
     # Create an array of zeros with the desired shape
     if size is None:

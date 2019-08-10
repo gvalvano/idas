@@ -25,38 +25,45 @@ class UNet(object):
     def __init__(self, incoming, n_out, is_training, n_filters=64, upsample='up2D', name='U-Net_2D'):
         """
         Class for UNet architecture. This is a 2D version (hence the vanilla UNet), which means it only employs
-        bi-dimensional convolution and strides. This implementation also uses batch normalization after each conv layer.
-        :param incoming: (tensor) incoming tensor
-        :param n_out: (int) number of channels for the network output. For instance, to predict a binary mask use
+        bi-dimensional convolution and strides. This implementation also uses batch normalization after each
+        convolutional layer.
+
+        Args:
+            incoming (tensor): incoming tensor
+            n_out (int): number of channels for the network output. For instance, to predict a binary mask use
                         n_out=2 (one-hot encoding); to predict a grayscale image use n_out=1
-        :param is_training: (tf.placeholder(dtype=tf.bool) or bool) variable to define training or test mode; it is
+            is_training (tf.placeholder(dtype=tf.bool) or bool): variable to define training or test mode; it is
                         needed for the behaviour of dropout, batch normalization, ecc. (which behave differently
                         at train and test time)
-        :param n_filters: (int) numebr of filters in the first layer. Default=64 (as in the vanilla unet)
-        :param upsample: (string) upsample strategy. Defaults 'up2D' interpolates the features maps using nearest
-                        neighbour strategy (as in the vanilla unet). Using 'deconv' you can force the model to
+            n_filters (int): number of filters in the first layer. Default=64 (as in the vanilla UNet)
+            upsample (string): upsample strategy. Defaults 'up2D' interpolates the features maps using nearest
+                        neighbour strategy (as in the vanilla UNet). Using 'deconv' you can force the model to
                         interpolate using the transposed convolution.
-        :param name: (string) name scope for the unet
+            name (string): variable scope for the UNet (optional)
 
-        - - - - - - - - - - - - - - - -
-        Notice that:
+        Notes:
           - this implementation works for incoming tensors with shape [None, N, M, K], where N and M must be divisible
             by 16 without any rest (in fact, there are 4 pooling layers with kernels 2x2 --> input reduced to:
             [None, N/16, M/16, K'])
           - the output of the network has activation linear
-        - - - - - - - - - - - - - - - -
 
-        Example of usage:
+        Examples:
 
-            # build the entire unet model:
-            unet = UNet(incoming, n_out, is_training).build()
-
-            # build the unet with access to the internal code:
+            Build the entire unet model:
+            '''python
             unet = UNet(incoming, n_out, is_training)
-            encoder = unet.build_encoder()
-            code = unet.build_code(encoder)
-            decoder = unet.build_decoder(code)
-            output = unet.build_output(decoder)
+            unet = unet.build()
+            prediction = unet.get_prediction()
+            '''
+
+            Build the unet with access to the internal code:
+            '''python
+            unet_dec = UNet(incoming, n_out, is_training)
+            encoder = unet_dec.build_encoder()
+            code = unet_dec.build_code(encoder)
+            decoder = unet_dec.build_decoder(code)
+            output = unet_dec.build_output(decoder)
+            '''
 
         """
         # check for compatible input dimensions
@@ -71,6 +78,7 @@ class UNet(object):
         self.nf = n_filters
         self.upsample = upsample
         self.name = name
+        self.unet_prediction = None
 
     def build(self):
         """
@@ -80,8 +88,15 @@ class UNet(object):
             encoder = self.build_encoder()
             code = self.build_bottleneck(encoder)
             decoder = self.build_decoder(code)
-            output = self.build_output(decoder)
-        return output
+            self.unet_prediction = self.build_output(decoder)
+        return self
+
+    def get_prediction(self):
+        """
+        Returns:
+            UNet prediction.
+        """
+        return self.unet_prediction
 
     def build_encoder(self):
         """ Encoder layers """

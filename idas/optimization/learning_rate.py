@@ -1,21 +1,29 @@
-"""
-Adapted from:
-    https://github.com/mhmoodlan/cyclic-learning-rate#usage
-"""
-
-#  Copyright 2019 Gabriele Valvano
-# 
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+# Adapted from:
+#     https://github.com/mhmoodlan/cyclic-learning-rate#usage
+#
+# With the following License:
+#
+# MIT License
+#
+# Copyright (c) 2018 Mahmoud Aslan
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 import tensorflow as tf
 from tensorflow.python.framework import ops
@@ -30,80 +38,77 @@ def cyclic_learning_rate(global_step,
                          gamma=0.99994,
                          mode='triangular',
                          name=None):
-    """Applies cyclic learning rate (CLR).
-     From the paper:
-     Smith, Leslie N. "Cyclical learning
-     rates for training neural networks." 2017.
-     [https://arxiv.org/pdf/1506.01186.pdf]
-      This method lets the learning rate cyclically
-     vary between reasonable boundary values
-     achieving improved classification accuracy and
-     often in fewer iterations.
-      This code varies the learning rate linearly between the
-     minimum (learning_rate) and the maximum (max_lr).
-      It returns the cyclic learning rate. It is computed as:
-       ```python
-       cycle = floor( 1 + global_step /
-        ( 2 * step_size ) )
-      x = abs( global_step / step_size – 2 * cycle + 1 )
-      clr = learning_rate +
-        ( max_lr – learning_rate ) * max( 0 , 1 - x )
-       ```
-      Polices:
-        'triangular':
-          Default, linearly increasing then linearly decreasing the
-          learning rate at each cycle.
-         'triangular2':
-          The same as the triangular policy except the learning
-          rate difference is cut in half at the end of each cycle.
-          This means the learning rate difference drops after each cycle.
-         'exp_range':
-          The learning rate varies between the minimum and maximum
-          boundaries and each boundary value declines by an exponential
-          factor of: gamma^global_step.
+    """
+    Applies cyclic learning rate (CLR) (Adapted from: https://github.com/mhmoodlan/cyclic-learning-rate#usage).
 
-       Example: 'triangular2' mode cyclic learning rate.
+    This method lets the learning rate cyclically vary between reasonable boundary values, achieving improved
+    classification accuracy and often in fewer iterations.
+
+    The following code varies the learning rate linearly between the minimum (learning_rate) and the maximum (max_lr).
+    It returns the cyclic learning rate. It is computed as:
+
+    ```python
+        cycle = floor( 1 + global_step / ( 2 * step_size ) )
+        x = abs( global_step / step_size – 2 * cycle + 1 )
+        clr = learning_rate + ( max_lr – learning_rate ) * max( 0 , 1 - x )
+    ```
+
+    Polices:
+        'triangular':
+            Default, linearly increasing then linearly decreasing the learning rate at each cycle.
+        'triangular2':
+            The same as the triangular policy except the learning rate difference is cut in half at the end of each
+            cycle. This means the learning rate difference drops after each cycle.
+        'exp_range':
+            The learning rate varies between the minimum and maximum boundaries and each boundary value declines by an
+            exponential factor of: gamma^global_step.
+
+    Args:
+        global_step (scalar): A scalar `int32` or `int64` `Tensor` or a Python number. Global step to use for the cyclic
+                computation.  Must not be negative.
+        learning_rate (scalar): A scalar `float32` or `float64` `Tensor` or a Python number. The initial learning rate
+                which is the lower bound of the cycle (default = 0.1).
+        max_lr (scalar): The maximum learning rate boundary.
+        step_size (scalar): The number of iterations in half a cycle. The paper suggests step_size = 2-8 x training
+                iterations in epoch.
+        gamma: constant in 'exp_range' mode: gamma**(global_step)
+        mode: one of {triangular, triangular2, exp_range}. Default 'triangular'. Values correspond to policies detailed
+            above.
+        name (string): Optional name of the operation. Defaults to 'CyclicLearningRate'.
+
+    Returns:
+        A scalar `Tensor` of the same type as `learning_rate`.  The cyclic learning rate.
+
+    Raises:
+        ValueError: if `global_step` is not supplied.
+
+    @compatibility(eager)
+        When eager execution is enabled, this function returns a function which in turn returns the decayed learning
+        rate Tensor. This can be useful for changing the learning rate value across different invocations of optimizer
+         functions.
+    @end_compatibility
+
+    Examples:
+        'triangular2' mode cyclic learning rate.
         '''python
         ...
         global_step = tf.Variable(0, trainable=False)
-        optimizer = tf.train.AdamOptimizer(learning_rate=
-          clr.cyclic_learning_rate(global_step=global_step, mode='triangular2'))
+        lr = clr.cyclic_learning_rate(global_step=global_step, mode='triangular2')
+        optimizer = tf.train.AdamOptimizer(learning_rate=lr)
         train_op = optimizer.minimize(loss_op, global_step=global_step)
         ...
-         with tf.Session() as sess:
+        with tf.Session() as sess:
             sess.run(init)
             for step in range(1, num_steps+1):
-              assign_op = global_step.assign(step)
-              sess.run(assign_op)
+                assign_op = global_step.assign(step)
+                sess.run(assign_op)
         ...
-         '''
-       Args:
-        global_step: A scalar `int32` or `int64` `Tensor` or a Python number.
-          Global step to use for the cyclic computation.  Must not be negative.
-        learning_rate: A scalar `float32` or `float64` `Tensor` or a
-        Python number.  The initial learning rate which is the lower bound
-          of the cycle (default = 0.1).
-        max_lr:  A scalar. The maximum learning rate boundary.
-        step_size: A scalar. The number of iterations in half a cycle.
-          The paper suggests step_size = 2-8 x training iterations in epoch.
-        gamma: constant in 'exp_range' mode:
-          gamma**(global_step)
-        mode: one of {triangular, triangular2, exp_range}.
-            Default 'triangular'.
-            Values correspond to policies detailed above.
-        name: String.  Optional name of the operation.  Defaults to
-          'CyclicLearningRate'.
-       Returns:
-        A scalar `Tensor` of the same type as `learning_rate`.  The cyclic
-        learning rate.
-      Raises:
-        ValueError: if `global_step` is not supplied.
-      @compatibility(eager)
-      When eager execution is enabled, this function returns
-      a function which in turn returns the decayed learning
-      rate Tensor. This can be useful for changing the learning
-      rate value across different invocations of optimizer functions.
-      @end_compatibility
+        '''
+
+    References:
+        [1] Smith, Leslie N. "Cyclical learning rates for training neural networks." 2017.
+        [https://arxiv.org/pdf/1506.01186.pdf]
+
     """
 
     if global_step is None:
@@ -117,7 +122,8 @@ def cyclic_learning_rate(global_step,
         step_size = math_ops.cast(step_size, dtype)
 
         def cyclic_lr():
-            """Helper to recompute learning rate; most helpful in eager-mode."""
+            """ Helper to recompute learning rate; most helpful in eager-mode.
+            """
 
             # computing: cycle = floor( 1 + global_step / ( 2 * step_size ) )
             double_step = math_ops.multiply(2., step_size)

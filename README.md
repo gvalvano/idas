@@ -10,6 +10,7 @@ For its use, in addition to the most common Python libraries, the installation o
 
 If you intend to use this code, please cite me :) 
 
+```
 @misc{idas,
   Author = {Gabriele Valvano},
   Title = {IDAS: Imaging and DAta Science library},
@@ -18,6 +19,7 @@ If you intend to use this code, please cite me :)
   Journal = {GitHub repository},
   Howpublished = {\url{https://github.com/gvalvano/idas}}
 }
+```
 
 ---------------------
 

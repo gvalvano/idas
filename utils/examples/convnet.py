@@ -20,9 +20,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import time
 import tensorflow as tf
 import errno
-from idas.callbacks import callbacks as tf_callbacks
-from idas.callbacks.dsd_callback import DSDCallback
-from idas.callbacks.routine_callback import RoutineCallback
+from callbacks import callbacks as tf_callbacks
+from callbacks import DSDCallback
+from callbacks.routine_callback import RoutineCallback
 import numpy as np
 
 

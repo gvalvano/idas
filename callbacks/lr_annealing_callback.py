@@ -29,8 +29,8 @@ Lastly, if you can afford the computational budget, err on the side of slower de
 import numpy as np
 import ast
 import os
-from idas.callbacks.callbacks import Callback
-import idas.logger.json_logger as jlogger
+from callbacks.callbacks import Callback
+import logger.json_logger as jlogger
 import tensorflow as tf
 
 

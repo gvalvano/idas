@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import tensorflow as tf
-from idas.metrics.tf_metrics import dice_coe, jaccard_coe, generalized_dice_coe, shannon_binary_entropy
+from metrics import dice_coe, jaccard_coe, generalized_dice_coe, shannon_binary_entropy
 
 
 def l2_weights_regularization_loss(exclude_bias=False):

@@ -15,9 +15,9 @@ This is a callback which is always run during the training.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from idas.callbacks.callbacks import Callback
-from idas.callbacks.dsd_callback import check_for_sparse_training
-from idas.callbacks.lr_annealing_callback import check_for_annealed_lr
+from callbacks.callbacks import Callback
+from callbacks import check_for_sparse_training
+from callbacks import check_for_annealed_lr
 import os
 
 

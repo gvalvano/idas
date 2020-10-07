@@ -15,7 +15,7 @@
 import numpy as np
 import scipy.ndimage
 import matplotlib.pyplot as plt
-from idas.data_augmentation.py_transformations import *
+from data_augmentation import *
 import nibabel as nib
 import tensorflow as tf
 

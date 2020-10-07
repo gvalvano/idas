@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cef464f6-26fe-4775-ad4e-46b4f0d292b5" name="Default Changelist" comment="" />
+    <list default="true" id="cef464f6-26fe-4775-ad4e-46b4f0d292b5" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -9,7 +11,20 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="315">
+                <caret line="21" column="3" lean-forward="true" selection-start-line="21" selection-start-column="3" selection-end-line="21" selection-end-column="3" />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -68,6 +83,7 @@
         <option value="$PROJECT_DIR$/idas/callbacks/routine_callback.py" />
         <option value="$PROJECT_DIR$/idas/callbacks/lr_annealing_callback.py" />
         <option value="$PROJECT_DIR$/idas/callbacks/dsd_callback.py" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -93,11 +109,22 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="idas_package" type="b2602c69:ProjectViewProjectNode" />
+              <item name="idas_package" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/idas/metrics" />
     <property name="node.js.detected.package.eslint" value="true" />
@@ -154,6 +181,7 @@
       <workItem from="1565286652991" duration="428000" />
       <workItem from="1565357034835" duration="1515000" />
       <workItem from="1565380009217" duration="16305000" />
+      <workItem from="1565822728296" duration="292000" />
     </task>
     <task id="LOCAL-00001" summary="fix comment">
       <created>1557995770094</created>
@@ -435,16 +463,24 @@
       <option name="project" value="LOCAL" />
       <updated>1565439533299</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="update README.md">
+      <created>1565822774443</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1565822774443</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22414000" />
+    <option name="totallyTimeSpent" value="22706000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="734" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2253635" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22859451" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -471,7 +507,6 @@
     <option name="version" value="1" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="add generalized dice coefficient" />
     <MESSAGE value="add shannon binary entropy loss" />
     <MESSAGE value="add generalized dice loss" />
     <MESSAGE value="move utils under new module" />
@@ -496,12 +531,10 @@
     <MESSAGE value="documentation fixes + fixing renamed variables for compatibility with idas.logger" />
     <MESSAGE value="documentation and licence fixes" />
     <MESSAGE value="remove unused files" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove unused files" />
+    <MESSAGE value="update README.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="update README.md" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/idas/losses/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/idas/metrics/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -876,6 +909,16 @@
           <folding>
             <element signature="e#662#707#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="315">
+            <caret line="21" column="3" lean-forward="true" selection-start-line="21" selection-start-column="3" selection-end-line="21" selection-end-column="3" />
+          </first_editor>
+          <second_editor />
         </state>
       </provider>
     </entry>

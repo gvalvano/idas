@@ -15,7 +15,7 @@ Callback early stopping.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from callbacks.callbacks import Callback
+from .callbacks import Callback
 
 
 class EarlyStoppingException(Exception):

@@ -16,8 +16,8 @@ Callback for DSD training [Han et al. 2017].
 #  limitations under the License.
 
 import tensorflow as tf
-from callbacks.callbacks import Callback
-import logger.json_logger as jlogger
+from .callbacks import Callback
+import idas.logger.json_logger as jlogger
 import os
 
 

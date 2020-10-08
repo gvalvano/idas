@@ -1,4 +1,3 @@
-#
 #  Copyright 2019 Gabriele Valvano
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +11,20 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-
 """
-Code inspired by: https://www.marcodena.it/blog/telegram-logging-handler-for-python-java-bash/
-For the guide you are invited to read the above post.
+Inspired by: https://www.marcodena.it/blog/telegram-logging-handler-for-python-java-bash/
+
+1) Search the "BotFather" on Telegram. This is the official bot that allows you to create other bots.
+2) Create new bot: /newbot
+3) Choose a name for your bot: ScriptNotifier
+4) Choose a username for your bot that must end with "_bot": script_notifier_bot
+5) Once the bot is created, you will have a long string that is the TOKENID
+6) The bot will send you messages on a specific chat, that you need to create. Go to Telegram search bar, on your
+   smartphone, and search your bot. Then, start the bot: /start
+7) Now you are ready to use a command line code to send your first notification:
+   "curl -s -X POST https://api.telegram.org/bot[TOKENID]/sendMessage -d chat_id=[ID] -d text="Hello world" "
+
+
 - - - - - - -
 bot page:
 https://api.telegram.org/bot[TOKENID]/getUpdates
@@ -49,7 +58,7 @@ class RequestsHandler(Handler):
         }
         return requests.post("https://api.telegram.org/bot{token}/sendMessage".format(token=self.token_id),
                              data=payload).content
-        
+
 
 class LogstashFormatter(Formatter):
     def __init__(self):

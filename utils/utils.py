@@ -81,10 +81,27 @@ def print_yellow_text(text, sep=True):
     print('\033[1;33m{0}\033[0m'.format(text))
 
 
-class BColors:
+def processing_time(test_function, *args):
+    """
+    Evaluates the time needed to execute the given function
+
+    Args:
+        test_function (function): function to execute
+        *args:
+
+    Returns:
+        Processing time and outputs of the function
+
+    """
+    start_time = time.time()
+    outputs = test_function(*args)
+    delta_t = time.time() - start_time
+    return delta_t, outputs
+
+
+class Colors:
     """ Colors for formatted text.
-    Examples:
-        print(bcolors.WARNING + "Warning: This is a warning." + bcolors.ENDC)
+    Example: print(Colors.WARNING + "Warning: This is a warning." + Colors.ENDC)
     """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
